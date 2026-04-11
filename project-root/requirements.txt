@@ -1,0 +1,21 @@
+# Web framework
+fastapi
+uvicorn[standard]
+
+# GitHub App
+PyJWT>=2.8.0
+cryptography
+httpx
+PyGithub
+
+# Parsing
+pyyaml
+
+# AI
+google-generativeai
+
+# Env
+python-dotenv
+
+# CORS
+starlette
