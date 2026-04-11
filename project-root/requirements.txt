@@ -19,3 +19,7 @@ python-dotenv
 
 # CORS
 starlette
+
+# CLI
+click
+rich

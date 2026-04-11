@@ -1,6 +1,8 @@
 version: "3.9"
 
 services:
+
+  # Main backend — always running
   backend:
     build:
       context: .
@@ -9,11 +11,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Live reload — any code change reflects immediately
       - .:/app
-      # Persist data across container restarts
       - ./data:/app/data
-      # GitHub App private key mounted read-only
       - ./private-key.pem:/app/private-key.pem:ro
     env_file:
       - .env
@@ -29,3 +28,27 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  # CLI service — run on demand, not always-on
+  # Usage: docker-compose run --rm cli scan main.tf
+  #        docker-compose run --rm cli logs app.log
+  #        docker-compose run --rm cli chat
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pr-sentinel-cli
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      # Point CLI at the backend service by container name
+      PR_SENTINEL_SERVER: http://backend:8000
+    entrypoint: ["python", "cli.py"]
+    # No ports needed — CLI only
+    profiles:
+      - cli
+    depends_on:
+      - backend
