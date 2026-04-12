@@ -166,3 +166,10 @@ cython_debug/
 
 # Docker
 .dockerignore
+
+# PR Sentinel / InfraGuard Specific Files
+*.pem
+private-key.pem
+data/
+*.db
+infraguard.db

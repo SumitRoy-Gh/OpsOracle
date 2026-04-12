@@ -199,7 +199,7 @@ def repo_risk(repo_id: str):
 # ── Scan History ───────────────────────────────────────────────────────────────
 
 @app.get("/api/scans")
-def list_scans(repo: str = None, limit: int = 50):
+def list_scans(repo: str | None = None, limit: int = 50):
     results = get_scans(repo=repo, limit=limit)
     return {"scans": results}
 

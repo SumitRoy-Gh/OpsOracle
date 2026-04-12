@@ -5,7 +5,6 @@ Called after the full analysis pipeline completes.
 """
 
 from __future__ import annotations
-import os
 from github_app.github_client import GitHubClient
 from schemas import AnalysisResult, Finding
 

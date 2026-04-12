@@ -1,4 +1,3 @@
-# empty
 """
 gemini_client.py
 Google Gemini API wrapper.

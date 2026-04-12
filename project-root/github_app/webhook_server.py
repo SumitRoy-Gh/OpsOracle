@@ -22,11 +22,15 @@ router = APIRouter()
 
 
 def _verify_signature(body: bytes, signature: str) -> bool:
-    secret   = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
-    expected = "sha256=" + hmac.new(
-        secret.encode(), body, hashlib.sha256
-    ).hexdigest()
-    return hmac.compare_digest(expected, signature)
+    secret = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
+    if not secret or not signature:
+        return False
+    mac      = hmac.new(secret.encode("utf-8"), body, hashlib.sha256)
+    expected = "sha256=" + mac.hexdigest()
+    try:
+        return hmac.compare_digest(expected, signature)
+    except Exception:
+        return False
 
 
 @router.post("/webhook/github")

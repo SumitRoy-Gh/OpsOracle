@@ -74,10 +74,41 @@ def save_scan(
     """Persist a scan result. Returns the new scan ID."""
     scan_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
-    
+
+    # ── Map new AnalysisResult schema to DB columns ──────────────────────────
+    # overall_score → risk_score (0-100)
+    # overall_grade → derived from overall_severity
+    # files_scanned → count of unique files in findings
+    # total_findings → len of findings list
+
+    findings_list = scan_result.get("findings", [])
+    risk_score    = scan_result.get("risk_score", 0)
+    severity      = scan_result.get("overall_severity", "Clean")
+
+    # Derive a letter grade from risk score for backward compat with frontend
+    if risk_score >= 90:
+        grade = "A"
+    elif risk_score >= 75:
+        grade = "B"
+    elif risk_score >= 60:
+        grade = "C"
+    elif risk_score >= 45:
+        grade = "D"
+    else:
+        grade = "F"
+
+    # Count unique files
+    unique_files = len({f.get("file", "") for f in findings_list if f.get("file")})
+
+    # Build severity counts from findings
+    severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "INFO": 0}
+    for f in findings_list:
+        sev = f.get("severity", "INFO")
+        severity_counts[sev] = severity_counts.get(sev, 0) + 1
+
     conn, is_pg = _get_connection()
     placeholder = "%s" if is_pg else "?"
-    
+
     try:
         with conn:
             cursor = conn.cursor()
@@ -86,18 +117,20 @@ def save_scan(
                 INSERT INTO scans
                   (id, repo, pr_number, commit_sha, overall_score, overall_grade,
                    files_scanned, total_findings, severity_counts, results, created_at)
-                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder},
+                        {placeholder}, {placeholder}, {placeholder}, {placeholder},
+                        {placeholder}, {placeholder}, {placeholder})
                 """,
                 (
                     scan_id,
                     repo,
                     pr_number,
                     commit_sha,
-                    scan_result.get("overall_score"),
-                    scan_result.get("overall_grade"),
-                    scan_result.get("files_scanned"),
-                    scan_result.get("total_findings"),
-                    json.dumps(scan_result.get("severity_counts", {})),
+                    risk_score,
+                    grade,
+                    unique_files,
+                    len(findings_list),
+                    json.dumps(severity_counts),
                     json.dumps(scan_result),
                     now,
                 ),

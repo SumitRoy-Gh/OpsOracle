@@ -110,9 +110,11 @@ def scan_file(file_path: str, content: str) -> dict[str, Any] | None:
         
         # Simple Compliance Mapping
         if "security" in fd["category"].lower():
-            fd["compliance"] = "CIS AWS Benchmarks 1.2, SOC2 CC6.1"
+            fd["compliance"] = ["CIS AWS Benchmarks 1.2", "SOC2 CC6.1"]
         elif "cost" in fd["category"].lower():
-            fd["compliance"] = "FinOps Foundation Best Practices"
+            fd["compliance"] = ["FinOps Foundation Best Practices"]
+        else:
+            fd["compliance"] = []
             
         enriched_findings.append(fd)
 

@@ -6,7 +6,7 @@ Every module — PR analysis, log analysis, chat — uses these same models.
 
 from __future__ import annotations
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # ── Request models ─────────────────────────────────────────────────────────────
@@ -40,6 +40,8 @@ class FeedbackRequest(BaseModel):
 # ── Finding model ──────────────────────────────────────────────────────────────
 
 class Finding(BaseModel):
+    model_config = ConfigDict(frozen=False)
+
     id: str
     title: str
     file: str

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  # Main backend — always running
+  # Main backend
   backend:
     build:
       context: .
@@ -13,6 +13,9 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+      # IMPORTANT: private-key.pem must exist before running docker-compose up
+      # Create a dummy file if you don't have one yet:
+      # touch private-key.pem
       - ./private-key.pem:/app/private-key.pem:ro
     env_file:
       - .env
@@ -29,10 +32,71 @@ services:
       retries: 3
       start_period: 10s
 
-  # CLI service — run on demand, not always-on
-  # Usage: docker-compose run --rm cli scan main.tf
-  #        docker-compose run --rm cli logs app.log
-  #        docker-compose run --rm cli chat
+  # Ngrok tunnel — exposes backend to GitHub webhooks
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: pr-sentinel-ngrok
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command: >
+      http backend:8000
+      --log=stdout
+    ports:
+      - "4040:4040"
+
+  # Webhook URL printer — prints the ngrok URL after startup
+  webhook-url:
+    image: python:3.11-slim
+    container_name: pr-sentinel-webhook-url
+    depends_on:
+      - ngrok
+    environment:
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+    command: >
+      python -c "
+      import urllib.request, json, time, os
+
+      print('Waiting for ngrok to start...')
+      time.sleep(5)
+
+      for attempt in range(10):
+          try:
+              with urllib.request.urlopen('http://ngrok:4040/api/tunnels') as r:
+                  data = json.loads(r.read())
+                  tunnels = data.get('tunnels', [])
+                  if tunnels:
+                      url = tunnels[0]['public_url']
+                      webhook = url + '/webhook/github'
+                      print()
+                      print('=' * 60)
+                      print('  NGROK TUNNEL ACTIVE')
+                      print('=' * 60)
+                      print()
+                      print('  Public URL:  ' + url)
+                      print('  Webhook URL: ' + webhook)
+                      print()
+                      print('  Go to your GitHub App settings and set:')
+                      print('  Webhook URL = ' + webhook)
+                      app_id = os.environ.get('GITHUB_APP_ID', '')
+                      if app_id:
+                          print()
+                          print('  GitHub App settings page:')
+                          print('  https://github.com/settings/apps')
+                      print()
+                      print('=' * 60)
+                      break
+          except Exception as e:
+              print('Attempt ' + str(attempt + 1) + ' failed: ' + str(e))
+              time.sleep(3)
+      "
+    profiles:
+      - tools
+
+  # CLI service
   cli:
     build:
       context: .
@@ -44,10 +108,8 @@ services:
     env_file:
       - .env
     environment:
-      # Point CLI at the backend service by container name
       PR_SENTINEL_SERVER: http://backend:8000
     entrypoint: ["python", "cli.py"]
-    # No ports needed — CLI only
     profiles:
       - cli
     depends_on:
