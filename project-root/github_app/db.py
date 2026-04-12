@@ -1,5 +1,5 @@
 """
-SQLite persistence for InfraGuard scan results.
+SQLite persistence for OpsOracle scan results.
 
 Schema:
   scans(id, repo, pr_number, commit_sha, overall_score, overall_grade,
@@ -18,7 +18,7 @@ from typing import Any
 
 # Detect database provider
 DATABASE_URL = os.environ.get("DATABASE_URL")
-DB_PATH = Path(__file__).parent.parent / "infraguard.db"
+DB_PATH = Path(__file__).parent.parent / "opsoracle.db"
 
 def _get_connection():
     if DATABASE_URL:

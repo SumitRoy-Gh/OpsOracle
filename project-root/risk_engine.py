@@ -54,7 +54,7 @@ def build_recommended_actions(findings: list[Finding]) -> list[str]:
     if "reliability" in categories:
         actions.append("Test reliability fixes in a staging environment first")
 
-    actions.append("Re-run PR Sentinel scan after all fixes are applied")
+    actions.append("Re-run OpsOracle scan after all fixes are applied")
     return actions
 
 

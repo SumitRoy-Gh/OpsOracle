@@ -19,7 +19,7 @@ except ImportError:
 
 
 class GeminiClient:
-    MODEL_ID = "gemini-1.5-flash"
+    MODEL_ID = "gemini-flash-latest"
 
     def __init__(self, api_key: str | None = None):
         key = api_key or os.environ.get("GEMINI_API_KEY", "")

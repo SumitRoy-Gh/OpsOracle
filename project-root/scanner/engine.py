@@ -1,5 +1,5 @@
 """
-InfraGuard Scanner Engine
+OpsOracle Scanner Engine
 
 Main entry point: scan_file(path, content) → structured JSON with risk score.
 Supports: terraform, dockerfile, docker_compose, github_actions, kubernetes, sam.

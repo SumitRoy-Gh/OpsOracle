@@ -1,6 +1,6 @@
 """
 cli.py
-PR Sentinel CLI — run scans, analyze logs, chat, and check history
+OpsOracle CLI — run scans, analyze logs, chat, and check history
 directly from the terminal. Works in two modes:
 
   LOCAL mode  — runs scanner + Gemini directly (no server needed)
@@ -27,6 +27,11 @@ import sys
 import textwrap
 from pathlib import Path
 
+# Force UTF-8 output on Windows to support emojis in terminal
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 import click
 import httpx
 from dotenv import load_dotenv
@@ -42,7 +47,7 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 console = Console()
 
 # Default backend URL — can be overridden with --server flag
-DEFAULT_SERVER = os.environ.get("PR_SENTINEL_SERVER", "http://localhost:8000")
+DEFAULT_SERVER = os.environ.get("OPSORACLE_SERVER", "http://localhost:8000")
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -71,7 +76,7 @@ def _severity_icon(severity: str) -> str:
 
 def _print_banner():
     console.print(Panel.fit(
-        "[bold white]🛡️  PR SENTINEL[/bold white]\n"
+        "[bold white]🛡️  OPSORACLE[/bold white]\n"
         "[dim]AI DevSecOps Review System[/dim]",
         border_style="yellow",
     ))
@@ -148,13 +153,13 @@ def _check_server(server: str) -> bool:
 @click.option(
     "--server", "-s",
     default=DEFAULT_SERVER,
-    help="PR Sentinel backend URL (default: http://localhost:8000)",
-    envvar="PR_SENTINEL_SERVER",
+    help="OpsOracle backend URL (default: http://localhost:8000)",
+    envvar="OPSORACLE_SERVER",
 )
 @click.pass_context
 def cli(ctx, server):
     """
-    🛡️  PR Sentinel CLI — AI DevSecOps Review System
+    🛡️  OpsOracle CLI — AI DevSecOps Review System
 
     Scan infrastructure files, analyze logs, and chat with the AI
     assistant directly from your terminal.
@@ -168,7 +173,7 @@ def cli(ctx, server):
 @cli.command()
 @click.pass_context
 def health(ctx):
-    """Check if the PR Sentinel backend is running."""
+    """Check if the OpsOracle backend is running."""
     _print_banner()
     server = ctx.obj["server"]
 
@@ -530,7 +535,7 @@ def logs(ctx, logfile, paste, json_out):
 @click.pass_context
 def chat(ctx, context):
     """
-    Start an interactive DevOps chat session with PR Sentinel AI.
+    Start an interactive DevOps chat session with OpsOracle AI.
 
     Examples:\n
       python cli.py chat\n
@@ -547,7 +552,7 @@ def chat(ctx, context):
         sys.exit(1)
 
     console.print(Panel(
-        "[bold]PR Sentinel AI DevOps Chat[/bold]\n"
+        "[bold]OpsOracle AI DevOps Chat[/bold]\n"
         "[dim]Ask anything about infrastructure, security, or logs.\n"
         "Type [bold]exit[/bold] or press Ctrl+C to quit.[/dim]",
         border_style="yellow",
@@ -600,7 +605,7 @@ def chat(ctx, context):
 
         history.append({"role": "assistant", "text": answer})
 
-        console.print("\n[bold green]PR Sentinel:[/bold green]")
+        console.print("\n[bold green]OpsOracle:[/bold green]")
         # Render markdown if it looks like it has markdown
         if any(c in answer for c in ("**", "##", "- ", "```", "`")):
             console.print(Markdown(answer))

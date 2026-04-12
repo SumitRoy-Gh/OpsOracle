@@ -52,5 +52,5 @@ def detect_file_type(file_path: str) -> str | None:
 
 
 def is_infra_file(file_path: str) -> bool:
-    """Returns True if the file should be scanned by InfraGuard."""
+    """Returns True if the file should be scanned by OpsOracle."""
     return detect_file_type(file_path) is not None

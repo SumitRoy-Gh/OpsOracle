@@ -39,7 +39,7 @@ from github_app.webhook_server import router as webhook_router
 # ── App setup ──────────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="PR Sentinel API",
+    title="OpsOracle API",
     description="AI DevSecOps Review System",
     version="1.0.0",
 )
@@ -65,7 +65,7 @@ init_db()
 def health():
     return HealthResponse(
         status="ok",
-        service="pr-sentinel-backend",
+        service="opsoracle-backend",
     )
 
 
@@ -145,7 +145,7 @@ async def chat(body: ChatRequest):
         text = turn.get("text", "")
         history_text += f"{role.upper()}: {text}\n"
 
-    prompt = f"""You are PR Sentinel, an AI DevSecOps assistant.
+    prompt = f"""You are OpsOracle, an AI DevSecOps assistant.
 You have access to the following scan or log analysis context:
 
 {body.context or "No context provided."}

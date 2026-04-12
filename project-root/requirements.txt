@@ -17,6 +17,9 @@ google-generativeai
 # Env
 python-dotenv
 
+# Data validation
+pydantic>=2.0
+
 # CORS
 starlette
 

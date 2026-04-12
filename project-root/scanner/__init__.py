@@ -1,4 +1,4 @@
-# InfraGuard Scanner Package
+# OpsOracle Scanner Package
 from .engine import scan_file, scan_repo
 from .detector import detect_file_type
 

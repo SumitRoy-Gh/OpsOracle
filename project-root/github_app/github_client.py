@@ -1,5 +1,5 @@
 """
-GitHub REST API client for InfraGuard.
+GitHub REST API client for OpsOracle.
 
 Wraps: get PR files, post review comments, set commit status.
 """
@@ -118,7 +118,7 @@ class GitHubClient:
         sha: str,
         state: str,       # success | failure | pending | error
         description: str,
-        context: str = "InfraGuard",
+        context: str = "OpsOracle",
         target_url: str = "",
     ) -> dict:
         """Set a commit status check (the ✅/❌ next to a commit)."""

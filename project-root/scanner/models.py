@@ -1,5 +1,5 @@
 """
-Shared data models for the InfraGuard scanner.
+Shared data models for the OpsOracle scanner.
 Kept in a separate module to avoid circular imports between engine and rules.
 """
 

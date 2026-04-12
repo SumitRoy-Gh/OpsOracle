@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pr-sentinel-backend
+    container_name: opsoracle-backend
     ports:
       - "8000:8000"
     volumes:
@@ -35,7 +35,7 @@ services:
   # Ngrok tunnel — exposes backend to GitHub webhooks
   ngrok:
     image: ngrok/ngrok:latest
-    container_name: pr-sentinel-ngrok
+    container_name: opsoracle-ngrok
     restart: unless-stopped
     depends_on:
       backend:
@@ -51,7 +51,7 @@ services:
   # Webhook URL printer — prints the ngrok URL after startup
   webhook-url:
     image: python:3.11-slim
-    container_name: pr-sentinel-webhook-url
+    container_name: opsoracle-webhook-url
     depends_on:
       - ngrok
     environment:
@@ -101,14 +101,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pr-sentinel-cli
+    container_name: opsoracle-cli
     volumes:
       - .:/app
       - ./data:/app/data
     env_file:
       - .env
     environment:
-      PR_SENTINEL_SERVER: http://backend:8000
+      OPSORACLE_SERVER: http://backend:8000
     entrypoint: ["python", "cli.py"]
     profiles:
       - cli

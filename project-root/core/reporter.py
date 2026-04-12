@@ -32,7 +32,7 @@ def _inline_comment(finding: Finding) -> str:
         lines.append(f"\n**Compliance:** {', '.join(finding.compliance)}")
     if finding.patch:
         lines.append(f"\n**Suggested patch:**\n```\n{finding.patch}\n```")
-    lines.append(f"\n*Confidence: {int(finding.confidence * 100)}% | PR Sentinel*")
+    lines.append(f"\n*Confidence: {int(finding.confidence * 100)}% | OpsOracle*")
     return "\n".join(lines)
 
 
@@ -42,7 +42,7 @@ def _summary_comment(result: AnalysisResult) -> str:
         counts[f.severity] = counts.get(f.severity, 0) + 1
 
     lines = [
-        "# 🛡️ PR Sentinel — Security Review",
+        "# 🛡️ OpsOracle — Security Review",
         "",
         f"**Risk Level:** {result.overall_severity}  |  "
         f"**Score:** {result.risk_score}/100  |  "
@@ -62,7 +62,7 @@ def _summary_comment(result: AnalysisResult) -> str:
             lines.append(f"- {action}")
 
     lines.append(
-        "\n---\n*Automated review by [PR Sentinel](https://github.com) — AI DevSecOps*"
+        "\n---\n*Automated review by [OpsOracle](https://github.com) — AI DevSecOps*"
     )
     return "\n".join(lines)
 
@@ -117,7 +117,7 @@ def post_pr_review(
         else "success"
     )
     description = (
-        f"PR Sentinel: {len(result.findings)} issue(s) — {result.overall_severity} risk"
+        f"OpsOracle: {len(result.findings)} issue(s) — {result.overall_severity} risk"
     )
     client.set_commit_status(
         owner=owner,
