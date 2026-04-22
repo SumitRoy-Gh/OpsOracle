@@ -312,10 +312,6 @@ def _run_local_scan(files: list[Path], json_out: bool, patch: bool = False):
         # ── Apply patches if --patch flag was used ──────────────────
         if patch:
             from core.patch_agent import PatchAgent
-            for f in findings:
-                if "safe_auto_fix" not in f:
-                    f["safe_auto_fix"] = True
-                    
             patchable = [f for f in findings if f.get("safe_auto_fix")]
             if patchable:
                 console.print(f"\n[bold yellow]Found {len(patchable)} auto-patchable finding(s)[/bold yellow]")
