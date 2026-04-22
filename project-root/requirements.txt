@@ -12,7 +12,7 @@ PyGithub
 pyyaml
 
 # AI
-google-generativeai
+google-genai
 
 # Env
 python-dotenv

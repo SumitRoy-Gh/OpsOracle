@@ -236,7 +236,7 @@ def scan(ctx, path, local, json_out, patch):
     # ── LOCAL mode — run scanner directly, no Gemini ──────────────────────────
     if local:
         console.print("[dim]Running in LOCAL mode (scanner only, no AI enrichment)[/dim]\n")
-        _run_local_scan(files, json_out)
+        _run_local_scan(files, json_out, patch)
         return
 
     # ── SERVER mode — send to backend ─────────────────────────────────────────
@@ -245,13 +245,13 @@ def scan(ctx, path, local, json_out, patch):
             f"[yellow]⚠ Backend not running at {server}. "
             f"Falling back to LOCAL mode.[/yellow]\n"
         )
-        _run_local_scan(files, json_out)
+        _run_local_scan(files, json_out, patch)
         return
 
     _run_server_scan(files, server, json_out, patch)
 
 
-def _run_local_scan(files: list[Path], json_out: bool):
+def _run_local_scan(files: list[Path], json_out: bool, patch: bool = False):
     """Run scanner directly without backend."""
     # Import here to avoid issues if scanner is not available
     from scanner.engine import scan_file
@@ -308,6 +308,57 @@ def _run_local_scan(files: list[Path], json_out: bool):
             _print_findings_table(findings)
         else:
             console.print("  [green]✅ Clean[/green]\n")
+
+        # ── Apply patches if --patch flag was used ──────────────────
+        if patch:
+            from core.patch_agent import PatchAgent
+            for f in findings:
+                if "safe_auto_fix" not in f:
+                    f["safe_auto_fix"] = True
+                    
+            patchable = [f for f in findings if f.get("safe_auto_fix")]
+            if patchable:
+                console.print(f"\n[bold yellow]Found {len(patchable)} auto-patchable finding(s)[/bold yellow]")
+                console.print("[yellow]Creating git checkpoint...[/yellow]")
+                file_contents = {}
+                try:
+                    p = Path(fname)
+                    if p.exists():
+                        file_contents[fname] = p.read_text(encoding="utf-8", errors="replace")
+                except Exception as read_err:
+                    console.print(f"  [dim]Could not read {fname}: {read_err}[/dim]")
+                
+                from schemas import Finding as FindingSchema
+                finding_objects = []
+                for fdict in patchable:
+                    fdict['file'] = fname
+                    fdict['title'] = fdict.get('title', fdict.get('message', 'Unknown'))
+                    fdict['explanation'] = fdict.get('explanation', fdict.get('message', ''))
+                    fdict['fix_suggestion'] = fdict.get('fix_suggestion', fdict.get('suggestion', ''))
+                    fdict['cost_impact'] = fdict.get('cost_impact', 'None')
+                    fdict['compliance'] = fdict.get('compliance', [])
+                    fdict['confidence'] = fdict.get('confidence', 0.8)
+                    try:
+                        finding_objects.append(FindingSchema(**fdict))
+                    except Exception as schema_err:
+                        console.print(f"  [dim]Skipping finding (schema error): {schema_err}[/dim]")
+                
+                if finding_objects:
+                    agent = PatchAgent(dry_run=False)
+                    patch_results = agent.patch_findings(finding_objects, file_contents)
+                    for pr in patch_results:
+                        if pr["status"] == "applied":
+                            console.print(f"  [green]✅ Patched: {pr['file']} (finding {pr['finding_id']})[/green]")
+                        elif pr["status"] == "dry_run":
+                            console.print(f"  [yellow]DRY RUN: {pr['file']}[/yellow]")
+                        elif pr["status"] == "skipped":
+                            console.print(f"  [dim]Skipped: {pr['reason']}[/dim]")
+                        else:
+                            console.print(f"  [red]Failed: {pr.get('reason', 'unknown error')}[/red]")
+                else:
+                    console.print("[dim]No valid finding objects could be built.[/dim]")
+            else:
+                console.print("[dim]No auto-patchable findings in this scan.[/dim]")
 
 
 def _run_server_scan(files: list[Path], server: str, json_out: bool, patch: bool):
@@ -404,26 +455,39 @@ def _run_server_scan(files: list[Path], server: str, json_out: bool, patch: bool
         # ── NEW: Apply patches if --patch flag was used ──────────────────
         if patch:
             from core.patch_agent import PatchAgent
-            from pathlib import Path
-            findings = result.get("findings", [])
-            patchable = [f for f in findings if f.get("safe_auto_fix")]
+            findings_list = result.get("findings", [])
+            patchable = [f for f in findings_list if f.get("safe_auto_fix")]
             if patchable:
                 console.print(f"\n[bold yellow]Found {len(patchable)} auto-patchable finding(s)[/bold yellow]")
                 console.print("[yellow]Creating git checkpoint...[/yellow]")
-                file_contents = {str(f): Path(str(f)).read_text() for f in files if Path(str(f)).exists()}
+                # Build file_contents from infra_files (the filtered list), with UTF-8 encoding
+                file_contents = {}
+                for inf_f in infra_files:
+                    try:
+                        file_contents[str(inf_f)] = inf_f.read_text(encoding="utf-8", errors="replace")
+                    except Exception as read_err:
+                        console.print(f"  [dim]Could not read {inf_f}: {read_err}[/dim]")
                 from schemas import Finding as FindingSchema
-                finding_objects = [FindingSchema(**fdict) for fdict in patchable]
-                agent = PatchAgent(dry_run=False)
-                patch_results = agent.patch_findings(finding_objects, file_contents)
-                for pr in patch_results:
-                    if pr["status"] == "applied":
-                        console.print(f"  [green]✅ Patched: {pr['file']} (finding {pr['finding_id']})[/green]")
-                    elif pr["status"] == "dry_run":
-                        console.print(f"  [yellow]DRY RUN: {pr['file']}[/yellow]")
-                    elif pr["status"] == "skipped":
-                        console.print(f"  [dim]Skipped: {pr['reason']}[/dim]")
-                    else:
-                        console.print(f"  [red]Failed: {pr.get('reason', 'unknown error')}[/red]")
+                finding_objects = []
+                for fdict in patchable:
+                    try:
+                        finding_objects.append(FindingSchema(**fdict))
+                    except Exception as schema_err:
+                        console.print(f"  [dim]Skipping finding (schema error): {schema_err}[/dim]")
+                if finding_objects:
+                    agent = PatchAgent(dry_run=False)
+                    patch_results = agent.patch_findings(finding_objects, file_contents)
+                    for pr in patch_results:
+                        if pr["status"] == "applied":
+                            console.print(f"  [green]✅ Patched: {pr['file']} (finding {pr['finding_id']})[/green]")
+                        elif pr["status"] == "dry_run":
+                            console.print(f"  [yellow]DRY RUN: {pr['file']}[/yellow]")
+                        elif pr["status"] == "skipped":
+                            console.print(f"  [dim]Skipped: {pr['reason']}[/dim]")
+                        else:
+                            console.print(f"  [red]Failed: {pr.get('reason', 'unknown error')}[/red]")
+                else:
+                    console.print("[dim]No valid finding objects could be built.[/dim]")
             else:
                 console.print("[dim]No auto-patchable findings in this scan.[/dim]")
         # ── END NEW CODE ──────────────────────────────────────────────────

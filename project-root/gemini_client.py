@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import google.generativeai as genai
+import google.genai as genai
 
 try:
     from dotenv import load_dotenv
@@ -28,8 +28,8 @@ class GeminiClient:
                 "GEMINI_API_KEY is not set. "
                 "Add it to your .env file."
             )
-        genai.configure(api_key=key)
-        self._model = genai.GenerativeModel(self.MODEL_ID)
+        self._client_genai = genai.Client(api_key=key)
+        self._model = self._client_genai.models
 
     def invoke(self, prompt: str, system_prompt: str = "") -> str:
         """
@@ -37,7 +37,10 @@ class GeminiClient:
         """
         full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
         try:
-            response = self._model.generate_content(full_prompt)
+            response = self._client_genai.models.generate_content(
+                model=self.MODEL_ID,
+                contents=full_prompt,
+            )
             return response.text
         except Exception as e:
             raise GeminiException(f"Gemini API call failed: {e}") from e
