@@ -16,8 +16,19 @@ from github_app.db import save_scan
 from scanner.engine import scan_file
 from core.planner import plan_pr_job
 from core.evaluator import evaluate_findings
+from core.trigger_agent import TriggerAgent
+
+# Create shared trigger agent instance
+_trigger_agent = TriggerAgent(
+    min_findings = 1,   # Must have at least 1 finding to call AI
+    cooldown_sec = 60,  # Wait 60 seconds between scans of same repo
+)
 from core.fix_builder import build_fixes
 from core.reporter import post_pr_review
+from auto_rollback import AutoRollback
+
+# Create one shared instance at module level
+_auto_rollback = AutoRollback()
 from risk_engine import build_analysis_result
 
 
@@ -35,6 +46,7 @@ def process_pr(
     # Step 1: Authenticate with GitHub
     token  = get_installation_token(installation_id)
     client = GitHubClient(token)
+    full_repo = f"{owner}/{repo}"
 
     # Step 2: Fetch all files changed in this PR
     pr_files = client.get_pr_files(owner, repo, pr_number)
@@ -66,19 +78,38 @@ def process_pr(
                 f["file"] = filename   # attach filename to each finding
             all_raw_findings.extend(scan_result["findings"])
 
-    # Step 5: Evaluator — Gemini enriches all findings
-    # Pass a small sample of file content as context
+    # Step 5: Evaluator — Gemini enriches all findings (with smart trigger)
     context_sample = "\n\n".join(
         f"# {k}\n{v[:400]}"
         for k, v in list(file_contents.items())[:3]
     )
-    enriched = evaluate_findings(all_raw_findings, context_sample)
+
+    # ── NEW: Ask the TriggerAgent if we should call Gemini ───────────────
+    if _trigger_agent.should_enrich(all_raw_findings, full_repo, file_contents):
+        enriched = evaluate_findings(
+            all_raw_findings,
+            context_sample,
+            repo=full_repo,
+            pr_number=pr_number
+        )
+        # Record successful scan so cooldown and cache are updated
+        _trigger_agent.record_scan(full_repo, file_contents, enriched)
+    else:
+        # Either cache hit, cooldown, or no findings — use fallback
+        cached = _trigger_agent.get_cached(file_contents)
+        if cached:
+            enriched = cached  # Reuse previous result
+            print(f"[PRScanner] Using cached enrichment for PR #{pr_number}")
+        else:
+            # No cache and no AI — use basic scanner output
+            from core.evaluator import _fallback_findings
+            enriched = _fallback_findings(all_raw_findings)
+    # ── END NEW CODE ─────────────────────────────────────────────────────
 
     # Step 6: Fix Builder — attempts safe patches
     enriched = build_fixes(enriched, file_contents)
 
     # Step 7: Build unified AnalysisResult
-    full_repo = f"{owner}/{repo}"
     result    = build_analysis_result(
         findings=enriched,
         source_type="pr",
@@ -108,6 +139,32 @@ def process_pr(
         result=result,
         dashboard_url=dashboard_url,
     )
+
+    # ── NEW: Auto-Rollback Decision ─────────────────────────────────────────
+    # Convert Finding objects to plain dicts for the evaluator
+    findings_as_dicts = [f.model_dump() for f in enriched]
+
+    rollback_result = _auto_rollback.evaluate(
+        findings   = findings_as_dicts,
+        risk_score = result.risk_score,
+        repo       = full_repo,
+        pr_number  = pr_number,
+    )
+
+    # Override the commit status using the rollback decision
+    # (The post_pr_review above already set one, but this overwrites it
+    # with the more precise BLOCKED/ALLOWED state)
+    override_client = GitHubClient(token)
+    override_client.set_commit_status(
+        owner=owner,
+        repo=repo,
+        sha=commit_sha,
+        state=rollback_result["state"],
+        description=rollback_result["description"],
+    )
+
+    print(f"[PRScanner] Auto-Rollback decision: {rollback_result['action']}")
+    # ── END NEW CODE ─────────────────────────────────────────────────────────
 
     print(f"[PRScanner] PR #{pr_number} scan complete. "
           f"Findings: {len(enriched)} | Score: {result.risk_score}")

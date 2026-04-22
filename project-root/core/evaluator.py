@@ -30,17 +30,41 @@ Rules:
 
 
 def evaluate_findings(
-    raw_findings: list[dict],
-    file_context: str = "",
+    raw_findings:   list[dict],
+    file_context:   str  = "",
+    repo:           str  = "",   # ← NEW PARAMETER
+    pr_number:      int  = 0,    # ← NEW PARAMETER
 ) -> list[Finding]:
     """
     Enrich scanner findings with Gemini reasoning.
-    Falls back to basic Finding objects if Gemini fails.
+    Now includes historical context from Pinecone vector DB.
     """
     if not raw_findings:
         return []
 
     client = GeminiClient()
+
+    # ── NEW: Fetch historical context from Pinecone ───────────────────────
+    history_context = ""
+    if repo:
+        try:
+            from rag.pinecone_store import get_repo_history_summary
+            history = get_repo_history_summary(repo)
+            if history["total_historical"] > 0:
+                recurring = history.get("recurring_issues", [])
+                history_context = (
+                    f"\n\nHISTORICAL CONTEXT FOR REPO {repo}:\n"
+                    f"- {history['total_historical']} findings recorded in past scans\n"
+                    f"- Severity breakdown: {history['severity_counts']}\n"
+                )
+                if recurring:
+                    history_context += f"- RECURRING ISSUES (seen multiple times): {recurring}\n"
+                    history_context += "  NOTE: Highlight recurring issues as patterns, not one-off mistakes.\n"
+            print(f"[Evaluator] Added history context: {history['total_historical']} past findings")
+        except Exception as e:
+            print(f"[Evaluator] Could not load Pinecone history: {e}")
+            history_context = ""
+    # ── END NEW CODE ──────────────────────────────────────────────────────
 
     prompt = f"""Here are raw infrastructure scan findings that need enrichment:
 
@@ -49,6 +73,7 @@ RAW FINDINGS:
 
 FILE CONTEXT (partial, for reference only):
 {file_context[:2000] if file_context else "Not provided"}
+{history_context}
 
 Return a JSON array. Each element must have exactly these fields:
 - id: string (keep original id or generate f_001, f_002 etc.)
@@ -69,11 +94,22 @@ Return the JSON array only. Start with ["""
 
     try:
         raw_response = client.invoke_json(prompt, SYSTEM_PROMPT)
-        # Ensure it starts with [
         if not raw_response.strip().startswith("["):
             raw_response = "[" + raw_response
         data = json.loads(raw_response)
-        return [_dict_to_finding(item) for item in data]
+        enriched = [_dict_to_finding(item) for item in data]
+
+        # ── NEW: Store enriched findings in Pinecone ──────────────────────
+        if repo and enriched:
+            try:
+                from rag.pinecone_store import ingest_findings
+                findings_dicts = [f.model_dump() for f in enriched]
+                ingest_findings(findings_dicts, repo, pr_number)
+            except Exception as e:
+                print(f"[Evaluator] Pinecone ingest failed (non-fatal): {e}")
+        # ── END NEW CODE ──────────────────────────────────────────────────
+
+        return enriched
 
     except Exception as e:
         print(f"[Evaluator] Gemini enrichment failed: {e}. Using fallback.")

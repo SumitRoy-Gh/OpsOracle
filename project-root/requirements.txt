@@ -26,3 +26,9 @@ starlette
 # CLI
 click
 rich
+
+# Vector DB 
+pinecone-client>=3.0.0
+sentence-transformers
+numpy
+

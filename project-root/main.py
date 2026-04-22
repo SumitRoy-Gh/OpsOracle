@@ -34,6 +34,7 @@ from log_analyzer.fix_suggester import log_analysis_to_result
 from risk_engine import build_analysis_result
 from gemini_client import GeminiClient
 from github_app.db import init_db, get_scans, get_scan_by_id
+from github_app.pr_scanner import _auto_rollback, _trigger_agent
 from github_app.webhook_server import router as webhook_router
 
 # ── App setup ──────────────────────────────────────────────────────────────────
@@ -210,3 +211,24 @@ def get_scan(scan_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Scan not found")
     return result
+
+
+# ── Auto-Rollback History Endpoint ──────────────────────────────────────────
+@app.get("/api/rollback-history")
+def rollback_history():
+    """
+    Returns the list of all auto-rollback decisions made this session.
+    Call this URL to see which PRs were blocked and why.
+    """
+    history = _auto_rollback.get_history()
+    return {
+        "total":   len(history),
+        "history": history,
+    }
+
+
+# ── Trigger Agent Stats Endpoint ─────────────────────────────────────────
+@app.get("/api/trigger-stats")
+def trigger_stats():
+    """Shows how many Gemini calls were saved by the trigger agent."""
+    return {"stats": _trigger_agent.get_stats()}
