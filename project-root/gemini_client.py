@@ -35,15 +35,33 @@ class GeminiClient:
         """
         Send prompt to Gemini. Returns plain text response.
         """
+        import time
         full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
-        try:
-            response = self._client_genai.models.generate_content(
-                model=self.MODEL_ID,
-                contents=full_prompt,
-            )
-            return response.text
-        except Exception as e:
-            raise GeminiException(f"Gemini API call failed: {e}") from e
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = self._client_genai.models.generate_content(
+                    model=self.MODEL_ID,
+                    contents=full_prompt,
+                )
+                return response.text
+            except Exception as e:
+                err_str = str(e)
+                # If we hit a rate limit, wait and try again
+                if "429" in err_str and attempt < max_retries - 1:
+                    wait_time = 30.0
+                    import re
+                    match = re.search(r"Please retry in ([\d\.]+)s", err_str)
+                    if match:
+                        wait_time = float(match.group(1)) + 2.0  # Add 2s buffer
+                    else:
+                        wait_time = (attempt + 1) * 30.0
+                        
+                    print(f"[GeminiClient] Rate limit hit (429). Retrying in {wait_time:.1f}s...")
+                    time.sleep(wait_time)
+                    continue
+                raise GeminiException(f"Gemini API call failed: {e}") from e
 
     def invoke_json(self, prompt: str, system_prompt: str = "") -> str:
         """
