@@ -34,7 +34,7 @@ from log_analyzer.fix_suggester import log_analysis_to_result
 from risk_engine import build_analysis_result
 from gemini_client import GeminiClient
 from github_app.db import init_db, get_scans, get_scan_by_id
-from github_app.pr_scanner import _auto_rollback, _trigger_agent
+from github_app.pr_scanner import _auto_rollback, _trigger_agent, _risk_tracker
 from github_app.webhook_server import router as webhook_router
 
 # ── App setup ──────────────────────────────────────────────────────────────────
@@ -232,3 +232,46 @@ def rollback_history():
 def trigger_stats():
     """Shows how many Gemini calls were saved by the trigger agent."""
     return {"stats": _trigger_agent.get_stats()}
+
+
+# ── Risk Tracker Endpoints ────────────────────────────────────────────────────
+
+@app.get("/api/risk-tracker/repos")
+def risk_tracker_all_repos():
+    """
+    Returns sliding window summaries for ALL repos that have been scanned.
+    Each entry shows trend (improving/degrading/stable), average score,
+    and alert if score has been declining for 3+ consecutive PRs.
+    """
+    all_repos = _risk_tracker.get_all_repos()
+    return {
+        "total_repos": len(all_repos),
+        "repos":       all_repos,
+    }
+
+
+@app.get("/api/risk-tracker/repo/{repo_id:path}")
+def risk_tracker_repo(repo_id: str):
+    """
+    Returns the sliding window summary for a specific repo.
+    
+    Example: GET /api/risk-tracker/repo/myorg/myrepo
+    
+    Returns score_history array perfect for drawing a line chart,
+    plus trend, average_score, and alert fields.
+    """
+    summary = _risk_tracker.get_repo_summary(repo_id)
+    return summary
+
+
+@app.get("/api/risk-tracker/alerts")
+def risk_tracker_alerts():
+    """
+    Returns ONLY repos that are currently degrading or have an active alert.
+    Use this for a dashboard "needs attention" panel.
+    """
+    degrading = _risk_tracker.get_degrading_repos()
+    return {
+        "total_alerts": len(degrading),
+        "repos":        degrading,
+    }

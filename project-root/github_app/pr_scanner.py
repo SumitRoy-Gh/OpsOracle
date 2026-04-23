@@ -29,6 +29,14 @@ from auto_rollback import AutoRollback
 
 # Create one shared instance at module level
 _auto_rollback = AutoRollback()
+
+from core.risk_tracker import RiskTracker
+
+# Persist windows to data/ so they survive restarts
+_risk_tracker = RiskTracker(
+    window_size  = 10,
+    persist_path = "data/risk_tracker.json",
+)
 from risk_engine import build_analysis_result
 
 
@@ -168,5 +176,31 @@ def process_pr(
 
     print(f"[PRScanner] PR #{pr_number} scan complete. "
           f"Findings: {len(enriched)} | Score: {result.risk_score}")
+
+    # ── NEW: Record this scan in the sliding window ───────────────────────────
+    findings_for_tracker = [f.model_dump() for f in enriched]
+    risk_summary = _risk_tracker.record_scan(
+        scan_id          = scan_id,
+        repo             = full_repo,
+        pr_number        = pr_number,
+        risk_score       = result.risk_score,
+        overall_severity = result.overall_severity,
+        findings         = findings_for_tracker,
+    )
+    print(f"[RiskTracker] Window summary: trend={risk_summary['trend']} "
+          f"avg={risk_summary['average_score']} "
+          f"consecutive_degrading={risk_summary['consecutive_degrading_prs']}")
+    # ── END NEW CODE ──────────────────────────────────────────────────────────
+
+    # Fix the broken learning_store — actually call save_finding_outcome
+    from core.learning_store import save_finding_outcome
+    for finding in enriched:
+        save_finding_outcome(
+            finding_id     = finding.id,
+            repo           = full_repo,
+            severity       = finding.severity,
+            fix_accepted   = False,
+            false_positive = False,
+        )
 
     return result.model_dump()

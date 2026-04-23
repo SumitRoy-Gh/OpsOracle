@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "finding_id": "REL-002",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "MEDIUM",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-23T07:05:04.868103"
+  },
+  {
+    "finding_id": "PERF-002",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-23T07:05:04.896212"
+  },
+  {
+    "finding_id": "PERF-003",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-23T07:05:04.916705"
+  }
+]
