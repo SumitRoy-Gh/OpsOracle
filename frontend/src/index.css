@@ -191,6 +191,7 @@ h3 {
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
   padding: var(--space-md);
   margin-bottom: var(--space-md);
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .neo-card-header {
@@ -216,6 +217,21 @@ h3 {
   text-transform: uppercase;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.neo-hover {
+  transition: transform 0.1s, box-shadow 0.1s;
+  cursor: pointer;
+}
+
+.neo-hover:hover {
+  transform: translate(var(--hover-translate), var(--hover-translate));
+  box-shadow: var(--hover-shadow) var(--hover-shadow) 0 var(--shadow-color) !important;
+}
+
+.neo-hover:active {
+  transform: translate(var(--active-translate), var(--active-translate));
+  box-shadow: 0 0 0 var(--shadow-color) !important;
 }
 
 .neo-button:hover {

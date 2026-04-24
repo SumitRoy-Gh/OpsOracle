@@ -240,51 +240,51 @@ function LandingPage() {
             <h2>Tactical Capabilities</h2>
           </div>
 
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Unified Context</h3>
             <p className="data-mono">Analyzes Terraform, Kubernetes manifests, Dockerfiles, and cloud formation scripts simultaneously with unified context.</p>
           </div>
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Plain English</h3>
             <p className="data-mono">Plain English translation of complex security vulnerabilities, pinpointing exact code lines and root causes.</p>
           </div>
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Cost Prediction</h3>
             <p className="data-mono">Predicts infrastructure cost anomalies introduced in PRs before they inflate your cloud bill.</p>
           </div>
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Auto-Remediation</h3>
             <p className="data-mono">Generates ready-to-merge remediation patches for identified vulnerabilities, tested against current state.</p>
           </div>
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Compliance Mapping</h3>
             <p className="data-mono">Real-time mapping of infrastructure changes against SOC2, ISO27001, and CIS benchmarks.</p>
           </div>
-          <div className="neo-card col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
             <h3 className="neo-card-header">Risk Memory</h3>
             <p className="data-mono">Retains context of past decisions, exceptions, and custom policies using advanced vector similarity.</p>
           </div>
         </div>
 
         {/* The Neural Pipeline */}
-        <div className="neo-card" style={{ maxWidth: '800px', width: '100%', marginTop: 'var(--space-xl)', backgroundColor: 'rgba(255,214,0,0.65)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', pointerEvents: 'auto' }}>
+        <div className="neo-card neo-hover" style={{ maxWidth: '800px', width: '100%', marginTop: 'var(--space-xl)', backgroundColor: 'rgba(255,214,0,0.65)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', pointerEvents: 'auto' }}>
           <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-sm)' }}>The Neural Pipeline</h2>
           <p className="ui-label-lg" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>Powered by RiskTracker Memory System</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)' }}>
+            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
               <h3>Trigger Agent</h3>
               <p className="data-mono">Intercepts PRs, identifies context boundaries, and retrieves relevant historical state.</p>
             </div>
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)' }}>
+            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
               <h3>Analysis Agent</h3>
               <p className="data-mono">Deep semantic inspection against security baselines and organizational policies.</p>
             </div>
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)' }}>
+            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
               <h3>Patch Agent</h3>
               <p className="data-mono">Synthesizes precise remediation code and tests against localized environment replicas.</p>
             </div>
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)' }}>
+            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
               <h3>AutoRollback</h3>
               <p className="data-mono">Monitors post-merge health metrics; initiates immediate reversion upon drift detection.</p>
             </div>
