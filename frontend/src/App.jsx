@@ -14,9 +14,12 @@ import AiInsights from './pages/AiInsights';
 import Documentation from './pages/Documentation';
 import ChangelogTeam from './pages/ChangelogTeam';
 
+/* ─────────────────────────────────────────────────────────
+   Layout — sidebar wrapper for post-installation pages only
+   ───────────────────────────────────────────────────────── */
 function Layout({ children }) {
   const location = useLocation();
-  
+
   return (
     <div className="app-container">
       <aside className="sidebar">
@@ -24,18 +27,16 @@ function Layout({ children }) {
           <h2>OpsOracle</h2>
         </div>
         <nav>
-          <Link to="/" className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}>Landing</Link>
           <Link to="/dashboard" className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}>Dashboard</Link>
-          <Link to="/repos" className={`nav-item ${location.pathname === '/repos' ? 'active' : ''}`}>Repos</Link>
-          <Link to="/history" className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}>Scan History</Link>
+          <Link to="/repos"     className={`nav-item ${location.pathname === '/repos'     ? 'active' : ''}`}>Repos</Link>
+          <Link to="/history"   className={`nav-item ${location.pathname === '/history'   ? 'active' : ''}`}>Scan History</Link>
           <Link to="/risk-tracker" className={`nav-item ${location.pathname === '/risk-tracker' ? 'active' : ''}`}>Risk Tracker</Link>
-          <Link to="/ai-insights" className={`nav-item ${location.pathname === '/ai-insights' ? 'active' : ''}`}>AI Insights</Link>
-          <Link to="/team" className={`nav-item ${location.pathname === '/team' ? 'active' : ''}`}>Team & Log</Link>
-          <Link to="/docs" className={`nav-item ${location.pathname === '/docs' ? 'active' : ''}`}>Docs</Link>
-          <Link to="/login" className={`nav-item ${location.pathname === '/login' ? 'active' : ''}`}>Login</Link>
+          <Link to="/ai-insights"  className={`nav-item ${location.pathname === '/ai-insights'  ? 'active' : ''}`}>AI Insights</Link>
+          <Link to="/team"      className={`nav-item ${location.pathname === '/team'      ? 'active' : ''}`}>Team &amp; Log</Link>
+          <Link to="/docs"      className={`nav-item ${location.pathname === '/docs'      ? 'active' : ''}`}>Docs</Link>
         </nav>
       </aside>
-      
+
       <main className="main-content">
         {children}
       </main>
@@ -43,22 +44,31 @@ function Layout({ children }) {
   );
 }
 
+/* ─────────────────────────────────────────────────────────
+   Routing
+   /            → LoginSignup  (no layout, GeometricBackground inside)
+   /login       → LoginSignup  (same)
+   /landing     → LandingPage  (post-login, no layout, GeometricBackground inside)
+   /dashboard + → Layout-wrapped page components
+   ───────────────────────────────────────────────────────── */
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginSignup />} />
-        <Route path="/" element={<LandingPage />} />
-        
-        {/* Protected/App Routes wrapped in Layout */}
-        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-        <Route path="/repos" element={<Layout><Repositories /></Layout>} />
-        <Route path="/history" element={<Layout><ScanHistory /></Layout>} />
-        <Route path="/scan/:id" element={<Layout><ScanDetail /></Layout>} />
+        {/* Auth & pre-install — no sidebar */}
+        <Route path="/"       element={<LoginSignup />} />
+        <Route path="/login"  element={<LoginSignup />} />
+        <Route path="/landing" element={<LandingPage />} />
+
+        {/* Post-installation — sidebar layout */}
+        <Route path="/dashboard"   element={<Layout><Dashboard /></Layout>} />
+        <Route path="/repos"       element={<Layout><Repositories /></Layout>} />
+        <Route path="/history"     element={<Layout><ScanHistory /></Layout>} />
+        <Route path="/scan/:id"    element={<Layout><ScanDetail /></Layout>} />
         <Route path="/risk-tracker" element={<Layout><RiskTracker /></Layout>} />
-        <Route path="/ai-insights" element={<Layout><AiInsights /></Layout>} />
-        <Route path="/team" element={<Layout><ChangelogTeam /></Layout>} />
-        <Route path="/docs" element={<Layout><Documentation /></Layout>} />
+        <Route path="/ai-insights"  element={<Layout><AiInsights /></Layout>} />
+        <Route path="/team"        element={<Layout><ChangelogTeam /></Layout>} />
+        <Route path="/docs"        element={<Layout><Documentation /></Layout>} />
       </Routes>
     </Router>
   );
