@@ -288,6 +288,10 @@ function LandingPage() {
           <button
             className="neo-button"
             style={{ fontSize: '18px', padding: '20px 40px' }}
+            onClick={() => {
+              const appName = 'your-app-slug-here'; // replace with your actual app slug
+              window.location.href = `https://github.com/apps/${appName}/installations/new`;
+            }}
           >
             Install on GitHub
           </button>

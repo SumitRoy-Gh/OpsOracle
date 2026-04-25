@@ -293,7 +293,7 @@ function LoginSignup() {
               e.currentTarget.style.transform = 'translate(0,0)';
               e.currentTarget.style.boxShadow = '4px 4px 0 #111111';
             }}
-            onClick={() => navigate('/landing')}
+            onClick={() => window.location.href = 'http://localhost:8000/auth/github/login'}
           >
             <GitHubIcon />
             Continue with GitHub
@@ -315,7 +315,7 @@ function LoginSignup() {
               e.currentTarget.style.transform = 'translate(0,0)';
               e.currentTarget.style.boxShadow = '4px 4px 0 #111111';
             }}
-            onClick={() => navigate('/landing')}
+            onClick={() => window.location.href = 'http://localhost:8000/auth/google/login'}
           >
             <GoogleIcon />
             Continue with Google

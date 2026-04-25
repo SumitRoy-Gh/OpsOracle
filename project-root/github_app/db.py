@@ -190,3 +190,118 @@ def get_scan_by_id(scan_id: str) -> dict | None:
     d["severity_counts"] = json.loads(d["severity_counts"] or "{}")
     d["results"] = json.loads(d["results"] or "{}")
     return d
+
+
+def init_users_table() -> None:
+    """Create users table if it doesn't exist."""
+    conn, is_pg = _get_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id TEXT PRIMARY KEY,
+                    email TEXT UNIQUE,
+                    name TEXT,
+                    avatar_url TEXT,
+                    github_id TEXT UNIQUE,
+                    google_id TEXT UNIQUE,
+                    github_login TEXT,
+                    installation_id TEXT,
+                    created_at TEXT NOT NULL
+                )
+            """)
+            conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_user(
+    provider_id: str,
+    provider: str,
+    email: str,
+    name: str,
+    avatar_url: str = "",
+    github_login: str = "",
+) -> dict:
+    """Create or update a user. Returns the user dict."""
+    import uuid
+    conn, is_pg = _get_connection()
+    placeholder = "%s" if is_pg else "?"
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Check if user exists
+    try:
+        cursor = conn.cursor()
+        if provider == "github":
+            cursor.execute(
+                f"SELECT * FROM users WHERE github_id = {placeholder}",
+                (provider_id,)
+            )
+        else:
+            cursor.execute(
+                f"SELECT * FROM users WHERE google_id = {placeholder}",
+                (provider_id,)
+            )
+        row = cursor.fetchone()
+
+        if row:
+            user_id = dict(row)["id"]
+            # Update existing user
+            if provider == "github":
+                cursor.execute(
+                    f"UPDATE users SET name={placeholder}, avatar_url={placeholder}, email={placeholder}, github_login={placeholder} WHERE id={placeholder}",
+                    (name, avatar_url, email, github_login, user_id)
+                )
+            else:
+                cursor.execute(
+                    f"UPDATE users SET name={placeholder}, avatar_url={placeholder}, email={placeholder} WHERE id={placeholder}",
+                    (name, avatar_url, email, user_id)
+                )
+            conn.commit()
+            cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
+            return dict(cursor.fetchone())
+        else:
+            # Create new user
+            user_id = str(uuid.uuid4())
+            github_id = provider_id if provider == "github" else None
+            google_id = provider_id if provider == "google" else None
+            cursor.execute(
+                f"""INSERT INTO users (id, email, name, avatar_url, github_id, google_id, github_login, created_at)
+                    VALUES ({placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder})""",
+                (user_id, email, name, avatar_url, github_id, google_id, github_login, now)
+            )
+            conn.commit()
+            cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
+            return dict(cursor.fetchone())
+    finally:
+        conn.close()
+
+
+def get_user_by_id(user_id: str) -> dict | None:
+    """Fetch a user by their ID."""
+    conn, is_pg = _get_connection()
+    placeholder = "%s" if is_pg else "?"
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def update_user_installation(user_id: str, installation_id: str) -> None:
+    """Save GitHub App installation ID for a user."""
+    conn, is_pg = _get_connection()
+    placeholder = "%s" if is_pg else "?"
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                f"UPDATE users SET installation_id = {placeholder} WHERE id = {placeholder}",
+                (installation_id, user_id)
+            )
+            conn.commit()
+    finally:
+        conn.close()

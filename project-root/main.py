@@ -33,9 +33,10 @@ from log_analyzer.root_cause import analyze_logs
 from log_analyzer.fix_suggester import log_analysis_to_result
 from risk_engine import build_analysis_result
 from gemini_client import GeminiClient
-from github_app.db import init_db, get_scans, get_scan_by_id
+from github_app.db import init_db, get_scans, get_scan_by_id, init_users_table
 from github_app.pr_scanner import _auto_rollback, _trigger_agent, _risk_tracker
 from github_app.webhook_server import router as webhook_router
+from auth_routes import router as auth_router
 
 # ── App setup ──────────────────────────────────────────────────────────────────
 
@@ -53,11 +54,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include webhook router
+# Include webhook and auth routers
 app.include_router(webhook_router)
+app.include_router(auth_router)
 
 # Initialize DB on startup
 init_db()
+init_users_table()
 
 
 # ── Health ─────────────────────────────────────────────────────────────────────
