@@ -49,4 +49,8 @@ export const api = {
   // Trigger stats
   getTriggerStats: () =>
     fetch(`${BASE_URL}/api/trigger-stats`, { credentials: 'include' }).then(r => r.json()),
+
+  // Repos
+  getUserRepos: () =>
+    fetch(`${BASE_URL}/auth/github/repos`, { credentials: 'include' }).then(r => r.json()),
 };

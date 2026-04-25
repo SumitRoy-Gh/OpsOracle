@@ -262,18 +262,44 @@ def upsert_user(
             cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
             return dict(cursor.fetchone())
         else:
-            # Create new user
-            user_id = str(uuid.uuid4())
-            github_id = provider_id if provider == "github" else None
-            google_id = provider_id if provider == "google" else None
+            # Before creating new user, check if same email already exists
+            # (happens when user logs in with different provider)
             cursor.execute(
-                f"""INSERT INTO users (id, email, name, avatar_url, github_id, google_id, github_login, created_at)
-                    VALUES ({placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder})""",
-                (user_id, email, name, avatar_url, github_id, google_id, github_login, now)
+                f"SELECT * FROM users WHERE email = {placeholder}",
+                (email,)
             )
-            conn.commit()
-            cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
-            return dict(cursor.fetchone())
+            existing_by_email = cursor.fetchone()
+
+            if existing_by_email:
+                # Merge — link this provider to the existing account
+                existing = dict(existing_by_email)
+                user_id = existing["id"]
+                if provider == "github":
+                    cursor.execute(
+                        f"UPDATE users SET github_id={placeholder}, github_login={placeholder}, name={placeholder}, avatar_url={placeholder} WHERE id={placeholder}",
+                        (provider_id, github_login, name, avatar_url, user_id)
+                    )
+                else:
+                    cursor.execute(
+                        f"UPDATE users SET google_id={placeholder}, name={placeholder}, avatar_url={placeholder} WHERE id={placeholder}",
+                        (provider_id, name, avatar_url, user_id)
+                    )
+                conn.commit()
+                cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
+                return dict(cursor.fetchone())
+            else:
+                # Truly new user — create fresh record
+                user_id = str(uuid.uuid4())
+                github_id = provider_id if provider == "github" else None
+                google_id = provider_id if provider == "google" else None
+                cursor.execute(
+                    f"""INSERT INTO users (id, email, name, avatar_url, github_id, google_id, github_login, created_at)
+                        VALUES ({placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder},{placeholder})""",
+                    (user_id, email, name, avatar_url, github_id, google_id, github_login, now)
+                )
+                conn.commit()
+                cursor.execute(f"SELECT * FROM users WHERE id = {placeholder}", (user_id,))
+                return dict(cursor.fetchone())
     finally:
         conn.close()
 

@@ -273,6 +273,69 @@ def github_app_callback(
     return RedirectResponse(url=f"{FRONTEND_URL}/dashboard")
 
 
+@router.get("/github/repos")
+def get_user_repos(request: Request):
+    """
+    Fetch the list of repositories where the user installed the GitHub App.
+    Uses the installation_id stored on the user record.
+    """
+    token = request.cookies.get("opsoracle_session")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    user_id = _verify_session_token(token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid session")
+
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    installation_id = user.get("installation_id")
+    if not installation_id:
+        # User hasn't installed the GitHub App yet
+        return {"repos": [], "installed": False, "message": "GitHub App not installed yet"}
+
+    # Get an installation token to call GitHub API
+    try:
+        from github_app.auth import get_installation_token
+        inst_token = get_installation_token(int(installation_id))
+
+        # Fetch repos accessible to this installation
+        repos_response = httpx.get(
+            "https://api.github.com/installation/repositories",
+            headers={
+                "Authorization": f"Bearer {inst_token}",
+                "Accept": "application/vnd.github.v3+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+            params={"per_page": 100},
+            timeout=15,
+        )
+
+        if repos_response.status_code != 200:
+            return {"repos": [], "installed": True, "message": "Could not fetch repos from GitHub"}
+
+        data = repos_response.json()
+        repos = [
+            {
+                "name": r["name"],
+                "full_name": r["full_name"],
+                "private": r["private"],
+                "description": r.get("description", ""),
+                "updated_at": r.get("updated_at", ""),
+                "default_branch": r.get("default_branch", "main"),
+                "html_url": r.get("html_url", ""),
+                "language": r.get("language", ""),
+            }
+            for r in data.get("repositories", [])
+        ]
+        return {"repos": repos, "installed": True, "total": len(repos)}
+
+    except Exception as e:
+        return {"repos": [], "installed": True, "message": f"Error: {str(e)}"}
+
+
 @router.post("/logout")
 def logout(response: Response):
     """Clear the session cookie."""

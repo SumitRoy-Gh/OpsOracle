@@ -290,7 +290,7 @@ function LandingPage() {
             style={{ fontSize: '18px', padding: '20px 40px' }}
             onClick={() => {
               const appName = 'your-app-slug-here'; // replace with your actual app slug
-              window.location.href = `https://github.com/apps/${appName}/installations/new`;
+              window.location.href = `https://github.com/apps/Opsoracle/installations/new`;
             }}
           >
             Install on GitHub
