@@ -194,114 +194,236 @@ function LandingPage() {
 
       <GeometricBackground />
 
-      {/* Header */}
-      <header style={{
-        borderBottom: '2px solid rgba(17,17,17,0.3)',
-        padding: 'var(--space-md) var(--space-lg)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255,248,239,0.6)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        position: 'relative',
-        zIndex: 10
-      }}>
-        <h2>OpsOracle</h2>
-        <nav style={{ display: 'flex', gap: 'var(--space-md)' }}>
-          <Link to="/docs" className="ui-label-lg" style={{ textDecoration: 'none', color: 'var(--on-surface)' }}>Docs</Link>
-          <Link to="/security" className="ui-label-lg" style={{ textDecoration: 'none', color: 'var(--on-surface)' }}>Security</Link>
-          <Link to="/team" className="ui-label-lg" style={{ textDecoration: 'none', color: 'var(--on-surface)' }}>Changelog</Link>
-          <Link to="/login" className="neo-button" style={{ textDecoration: 'none' }}>Login</Link>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 'var(--space-xl) var(--space-md)', position: 'relative', zIndex: 10, pointerEvents: 'none' }}>
-
-        <div style={{ maxWidth: '800px', textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-          <h1 style={{ fontSize: '64px', marginBottom: 'var(--space-md)' }}>Stop merging broken infrastructure</h1>
-          <p className="data-mono" style={{ fontSize: '18px', marginBottom: 'var(--space-lg)' }}>
-            The precision-engineered DevSecOps agent that autonomously scans, analyzes, and patches vulnerabilities before they reach production. Build with absolute structural integrity.
-          </p>
-          <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', pointerEvents: 'auto' }}>
-            <button className="neo-button" style={{ fontSize: '18px', padding: 'var(--space-md) var(--space-lg)' }}>
-              INSTALL ON GITHUB
-            </button>
-            <Link to="/dashboard" className="neo-button" style={{ textDecoration: 'none', fontSize: '18px', padding: 'var(--space-md) var(--space-lg)', border: '2px solid #111111', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', color: '#111111' }}>
-              VIEW DEMO DASHBOARD
-            </Link>
-          </div>
+      {/* ── SECTION 1: Hero — scale adjusted ── */}
+      <section
+        style={{
+          minHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 10,
+          padding: 'var(--space-xl) var(--space-md)',
+          textAlign: 'center',
+        }}
+      >
+        {/* Pill badge */}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            backgroundColor: 'var(--primary-container)',
+            border: '2px solid #111111',
+            borderRadius: '999px',
+            padding: '6px 20px',
+            marginBottom: '40px',
+            boxShadow: '4px 4px 0 #111111',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'var(--font-ui-label-sm-family)',
+              fontSize: '14px',
+              fontWeight: 800,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#111111',
+            }}
+          >
+            AI-Powered DevSecOps
+          </span>
         </div>
 
+        {/* Main heading - Massive & Bold */}
+        <h1
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '140px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.06em',
+            lineHeight: 0.9,
+            maxWidth: '1100px',
+            marginBottom: '40px',
+            color: 'var(--on-surface)',
+            filter: 'drop-shadow(8px 8px 0px rgba(0,0,0,0.05))',
+          }}
+        >
+          OpsOracle
+        </h1>
+
+        {/* Subheading line 1 */}
+        <p
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '32px',
+            fontWeight: 600,
+            color: 'var(--on-surface)',
+            marginBottom: '20px',
+            lineHeight: 1.2,
+          }}
+        >
+          Stop merging broken infrastructure
+        </p>
+
+        {/* Subheading line 2 */}
+        <p
+          className="data-mono"
+          style={{
+            fontSize: '18px',
+            color: 'var(--on-surface-variant)',
+            maxWidth: '640px',
+            marginBottom: '56px',
+            lineHeight: 1.6,
+          }}
+        >
+          The precision-engineered DevSecOps agent that autonomously scans,
+          analyzes, and patches vulnerabilities before they reach production.
+          Build with absolute structural integrity.
+        </p>
+
+        {/* CTA buttons - Larger */}
+        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            className="neo-button"
+            style={{ fontSize: '18px', padding: '20px 40px' }}
+          >
+            Install on GitHub
+          </button>
+          <Link
+            to="/dashboard"
+            className="neo-button"
+            style={{
+              textDecoration: 'none',
+              fontSize: '18px',
+              padding: '20px 40px',
+              backgroundColor: 'rgba(255,255,255,0.6)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '2px solid #111111',
+              color: '#111111',
+            }}
+          >
+            View Demo Dashboard
+          </Link>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: Tactical Capabilities + Neural Pipeline ── */}
+      <main
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '0 var(--space-md) var(--space-xl)',
+          position: 'relative',
+          zIndex: 10,
+          pointerEvents: 'none',
+          gap: 'var(--space-xl)',
+        }}
+      >
         {/* Tactical Capabilities */}
         <div className="dashboard-grid" style={{ maxWidth: '1200px', width: '100%' }}>
           <div className="col-span-12" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
             <h2>Tactical Capabilities</h2>
           </div>
 
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>analytics</span>
             <h3 className="neo-card-header">Unified Context</h3>
             <p className="data-mono">Analyzes Terraform, Kubernetes manifests, Dockerfiles, and cloud formation scripts simultaneously with unified context.</p>
           </div>
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>translate</span>
             <h3 className="neo-card-header">Plain English</h3>
             <p className="data-mono">Plain English translation of complex security vulnerabilities, pinpointing exact code lines and root causes.</p>
           </div>
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>payments</span>
             <h3 className="neo-card-header">Cost Prediction</h3>
             <p className="data-mono">Predicts infrastructure cost anomalies introduced in PRs before they inflate your cloud bill.</p>
           </div>
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>auto_fix_high</span>
             <h3 className="neo-card-header">Auto-Remediation</h3>
             <p className="data-mono">Generates ready-to-merge remediation patches for identified vulnerabilities, tested against current state.</p>
           </div>
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>verified_user</span>
             <h3 className="neo-card-header">Compliance Mapping</h3>
             <p className="data-mono">Real-time mapping of infrastructure changes against SOC2, ISO27001, and CIS benchmarks.</p>
           </div>
-          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="neo-card neo-hover col-span-4" style={{ pointerEvents: 'auto', backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)' }}>history</span>
             <h3 className="neo-card-header">Risk Memory</h3>
             <p className="data-mono">Retains context of past decisions, exceptions, and custom policies using advanced vector similarity.</p>
           </div>
         </div>
 
         {/* The Neural Pipeline */}
-        <div className="neo-card neo-hover" style={{ maxWidth: '800px', width: '100%', marginTop: 'var(--space-xl)', backgroundColor: 'rgba(255,214,0,0.65)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', pointerEvents: 'auto' }}>
+        <div
+          className="neo-card neo-hover"
+          style={{
+            maxWidth: '800px',
+            width: '100%',
+            backgroundColor: 'rgba(255,214,0,0.65)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-md)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#111111' }}>hub</span>
+          </div>
           <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-sm)' }}>The Neural Pipeline</h2>
-          <p className="ui-label-lg" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>Powered by RiskTracker Memory System</p>
+          <p className="ui-label-lg" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
+            Powered by RiskTracker Memory System
+          </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
-              <h3>Trigger Agent</h3>
-              <p className="data-mono">Intercepts PRs, identifies context boundaries, and retrieves relevant historical state.</p>
-            </div>
-            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
-              <h3>Analysis Agent</h3>
-              <p className="data-mono">Deep semantic inspection against security baselines and organizational policies.</p>
-            </div>
-            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
-              <h3>Patch Agent</h3>
-              <p className="data-mono">Synthesizes precise remediation code and tests against localized environment replicas.</p>
-            </div>
-            <div className="neo-hover" style={{ backgroundColor: 'rgba(255,255,255,0.7)', border: '2px solid var(--border-color)', padding: 'var(--space-md)', backdropFilter: 'blur(6px)', boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)' }}>
-              <h3>AutoRollback</h3>
-              <p className="data-mono">Monitors post-merge health metrics; initiates immediate reversion upon drift detection.</p>
-            </div>
+            {[
+              { title: 'Trigger Agent', icon: 'input', desc: 'Intercepts PRs, identifies context boundaries, and retrieves relevant historical state.' },
+              { title: 'Analysis Agent', icon: 'search', desc: 'Deep semantic inspection against security baselines and organizational policies.' },
+              { title: 'Patch Agent', icon: 'precision_manufacturing', desc: 'Synthesizes precise remediation code and tests against localized environment replicas.' },
+              { title: 'AutoRollback', icon: 'history_toggle_off', desc: 'Monitors post-merge health metrics; initiates immediate reversion upon drift detection.' },
+            ].map(({ title, icon, desc }) => (
+              <div
+                key={title}
+                className="neo-hover"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  border: '2px solid var(--border-color)',
+                  padding: 'var(--space-md)',
+                  backdropFilter: 'blur(6px)',
+                  boxShadow: 'var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 'var(--space-md)'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--primary)', marginTop: '4px' }}>{icon}</span>
+                <div>
+                  <h3>{title}</h3>
+                  <p className="data-mono">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
       </main>
 
       {/* Footer */}
-      <footer style={{
-        borderTop: 'var(--border-width) solid var(--border-color)',
-        padding: 'var(--space-xl) var(--space-lg)',
-        backgroundColor: 'var(--sidebar-bg)',
-        color: 'var(--sidebar-text)',
-        position: 'relative',
-        zIndex: 10
-      }}>
+      <footer
+        style={{
+          borderTop: 'var(--border-width) solid var(--border-color)',
+          padding: 'var(--space-xl) var(--space-lg)',
+          backgroundColor: 'var(--sidebar-bg)',
+          color: 'var(--sidebar-text)',
+          position: 'relative',
+          zIndex: 10,
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '1200px', margin: '0 auto' }}>
           <div>
             <h2 style={{ color: 'var(--primary-container)' }}>OpsOracle</h2>
