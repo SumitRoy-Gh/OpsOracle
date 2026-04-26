@@ -55,7 +55,7 @@ Return a JSON object with exactly these fields:
 - uncertainty: string (what you are not sure about, empty string if confident)"""
 
     try:
-        raw      = client.invoke_json(prompt, SYSTEM_PROMPT)
+        raw      = client.invoke_json(prompt, SYSTEM_PROMPT, max_retries=2, use_cache=True)
         analysis = json.loads(raw)
     except Exception as e:
         analysis = {

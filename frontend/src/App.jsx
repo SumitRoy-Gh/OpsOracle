@@ -41,7 +41,7 @@ function Layout({ children, user }) {
           </Link>
           <Link to="/risk-tracker" className={`nav-item ${location.pathname === '/risk-tracker' ? 'active' : ''}`}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>trending_down</span>
-            Risk Tracker
+            Security Health Tracker
           </Link>
           <Link to="/ai-insights" className={`nav-item ${location.pathname === '/ai-insights' ? 'active' : ''}`}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>smart_toy</span>

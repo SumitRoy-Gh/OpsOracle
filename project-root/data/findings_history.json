@@ -22,5 +22,13 @@
     "fix_accepted": false,
     "false_positive": false,
     "timestamp": "2026-04-23T07:05:04.916705"
+  },
+  {
+    "finding_id": "SEC-008",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "HIGH",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-26T10:18:04.184285"
   }
 ]

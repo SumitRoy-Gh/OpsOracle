@@ -146,7 +146,7 @@ If you cannot safely make this fix, return exactly: SKIP_THIS_PATCH"""
 
 
         try:
-            raw = self.client.invoke(prompt, PATCH_SYSTEM_PROMPT)
+            raw = self.client.invoke(prompt, PATCH_SYSTEM_PROMPT, max_retries=2)
             raw = raw.strip()
 
 

@@ -49,7 +49,7 @@ function ScanDetail() {
           backgroundColor: scan.overall_score >= 75 ? 'var(--primary-container)' : 'var(--error-container)',
           display: 'flex', flexDirection: 'column', gap: '8px'
         }}>
-          <h3 className="neo-card-header">Risk Score</h3>
+          <h3 className="neo-card-header">Security Health Score</h3>
           <div style={{ fontFamily: 'var(--font-h1-family)', fontSize: '64px', fontWeight: 900, lineHeight: 1 }}>
             {scan.overall_score}
           </div>

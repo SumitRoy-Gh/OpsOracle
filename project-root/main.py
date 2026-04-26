@@ -32,7 +32,7 @@ from core.learning_store import save_feedback, get_repo_risk_trend
 from log_analyzer.root_cause import analyze_logs
 from log_analyzer.fix_suggester import log_analysis_to_result
 from risk_engine import build_analysis_result
-from gemini_client import GeminiClient
+from gemini_client import GeminiClient, GeminiRateLimitError
 from github_app.db import init_db, get_scans, get_scan_by_id, init_users_table
 from github_app.pr_scanner import _auto_rollback, _trigger_agent, _risk_tracker
 from github_app.webhook_server import router as webhook_router
@@ -163,8 +163,10 @@ Reply as a senior DevOps engineer. Be concise, specific, and actionable.
 If explaining a fix, give the exact change needed."""
 
     try:
-        response = client.invoke(prompt)
+        response = client.invoke(prompt, max_retries=0, fail_fast=True)
         return ChatResponse(response=response)
+    except GeminiRateLimitError as e:
+        raise HTTPException(status_code=429, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

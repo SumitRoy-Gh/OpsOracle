@@ -26,7 +26,7 @@ class ScanSnapshot:
     scan_id:          str
     repo:             str
     pr_number:        int
-    risk_score:       int
+    health_score:     int
     overall_severity: str
     total_findings:   int
     critical_count:   int
@@ -40,7 +40,7 @@ class ScanSnapshot:
             "scan_id":          self.scan_id,
             "repo":             self.repo,
             "pr_number":        self.pr_number,
-            "risk_score":       self.risk_score,
+            "health_score":     self.health_score,
             "overall_severity": self.overall_severity,
             "total_findings":   self.total_findings,
             "critical_count":   self.critical_count,
@@ -74,13 +74,13 @@ class RepoWindow:
         Compare the latest scan score to the previous one.
         Returns: 'improving', 'degrading', 'stable', or 'insufficient_data'
         
-        A score going DOWN means risk is INCREASING (degrading).
-        A score going UP means risk is DECREASING (improving).
+        A health score going DOWN means the environment is DEGRADING (more risk).
+        A health score going UP means the environment is IMPROVING (less risk).
         We use a 5-point buffer to avoid false alarms from tiny fluctuations.
         """
         if len(self._scans) < 2:
             return "insufficient_data"
-        scores = [s.risk_score for s in self._scans]
+        scores = [s.health_score for s in self._scans]
         recent   = scores[-1]   # most recent scan
         previous = scores[-2]   # scan before that
         if recent < previous - 5:
@@ -91,19 +91,16 @@ class RepoWindow:
             return "stable"       # within 5 points either way
 
     def get_average_score(self) -> float:
-        """Average risk score across all scans in the window."""
+        """Average health score across all scans in the window."""
         if not self._scans:
             return 100.0
-        return sum(s.risk_score for s in self._scans) / len(self._scans)
+        return sum(s.health_score for s in self._scans) / len(self._scans)
 
     def count_consecutive_degrading(self) -> int:
         """
         Count how many consecutive recent PRs have had a LOWER score than the one before.
-        
-        Example: scores [90, 85, 82, 79] → returns 3
-        Example: scores [90, 85, 88, 79] → returns 1 (only last one degraded)
         """
-        scores = [s.risk_score for s in self._scans]
+        scores = [s.health_score for s in self._scans]
         count = 0
         # Walk backwards from the end
         for i in range(len(scores) - 1, 0, -1):
@@ -139,8 +136,8 @@ class RepoWindow:
                 f"Immediate attention required."
             )
         elif trend == "degrading":
-            score_drop = self._scans[-2].risk_score - latest.risk_score
-            alert = f"WARNING: Risk score dropped {score_drop} points in the latest PR."
+            score_drop = self._scans[-2].health_score - latest.health_score
+            alert = f"WARNING: Security Health Score decreased by {score_drop} points in the latest PR."
 
         return {
             "repo":                     self.repo,
@@ -148,7 +145,7 @@ class RepoWindow:
             "window_size":              self.window_size,
             "trend":                    trend,
             "average_score":            round(self.get_average_score(), 1),
-            "latest_score":             latest.risk_score,
+            "latest_score":             latest.health_score,
             "latest_pr":                latest.pr_number,
             "latest_severity":          latest.overall_severity,
             "consecutive_degrading_prs": consecutive_degrading,
@@ -157,7 +154,7 @@ class RepoWindow:
             "score_history": [
                 {
                     "pr":        s.pr_number,
-                    "score":     s.risk_score,
+                    "score":     s.health_score,
                     "severity":  s.overall_severity,
                     "findings":  s.total_findings,
                     "timestamp": s.timestamp,
@@ -179,7 +176,7 @@ class RiskTracker:
     
     Usage:
         tracker = RiskTracker(window_size=10)
-        tracker.record_scan(scan_id, repo, pr_number, risk_score, severity, findings)
+        tracker.record_scan(scan_id, repo, pr_number, health_score, severity, findings)
         summary = tracker.get_repo_summary("myorg/myrepo")
     """
 
@@ -208,7 +205,7 @@ class RiskTracker:
         scan_id:          str,
         repo:             str,
         pr_number:        int,
-        risk_score:       int,
+        health_score:     int,
         overall_severity: str,
         findings:         list,
     ) -> dict:
@@ -232,7 +229,7 @@ class RiskTracker:
             scan_id          = scan_id,
             repo             = repo,
             pr_number        = pr_number,
-            risk_score       = risk_score,
+            health_score     = health_score,
             overall_severity = overall_severity,
             total_findings   = len(findings),
             critical_count   = severity_counts.get("CRITICAL", 0),
@@ -260,7 +257,7 @@ class RiskTracker:
         else:
             print(
                 f"[RiskTracker] {repo} PR #{pr_number}: "
-                f"score={risk_score} trend={summary['trend']}"
+                f"score={health_score} trend={summary['trend']}"
             )
 
         return summary
@@ -311,6 +308,9 @@ class RiskTracker:
             for repo, snapshots in data.items():
                 self._windows[repo] = RepoWindow(repo, self.window_size)
                 for s in snapshots:
+                    # Handle backward compatibility for renamed key
+                    if "risk_score" in s:
+                        s["health_score"] = s.pop("risk_score")
                     self._windows[repo].add(ScanSnapshot(**s))
             print(f"[RiskTracker] Loaded {len(self._windows)} repo window(s) from disk")
         except Exception as e:

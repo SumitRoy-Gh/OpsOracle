@@ -61,7 +61,7 @@ Return a JSON object with exactly these fields:
   (one sentence explaining why this patch is safe)"""
 
         try:
-            raw = client.invoke_json(prompt, SYSTEM_PROMPT)
+            raw = client.invoke_json(prompt, SYSTEM_PROMPT, max_retries=2)
             data = json.loads(raw)
             if not data.get("suggestion_only", True) and data.get("patch", "").strip():
                 finding.patch = data["patch"]

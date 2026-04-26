@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-function RiskTracker() {
+function SecurityHealthTracker() {
   const [repos, setRepos] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -25,9 +28,9 @@ function RiskTracker() {
   return (
     <>
       <header style={{ marginBottom: 'var(--space-md)' }}>
-        <h1>Risk Tracker</h1>
+        <h1>Security Health Tracker</h1>
         <p className="data-mono" style={{ marginTop: 'var(--space-sm)', color: 'var(--on-surface-variant)' }}>
-          10-PR sliding window risk analysis for all repositories.
+          10-PR sliding window health analysis for all repositories.
         </p>
       </header>
 
@@ -83,9 +86,9 @@ function RiskTracker() {
                         {repo.scans_in_window}/{repo.window_size}
                       </td>
                       <td style={{ padding: 'var(--space-md)' }}>
-                        <button className="neo-button ghost" style={{ padding: '4px 8px', fontSize: '11px' }} onClick={() => setSelectedRepo(repo)}>
-                          View History
-                        </button>
+                        <Link to="/history" className="neo-button ghost" style={{ padding: '4px 8px', fontSize: '11px', textDecoration: 'none' }}>
+                          Scan History
+                        </Link>
                       </td>
                     </tr>
                   );
@@ -96,30 +99,76 @@ function RiskTracker() {
         </div>
 
         {selectedRepo && selectedRepo.score_history && selectedRepo.score_history.length > 0 && (
-          <div className="neo-card col-span-12">
+          <div id="graph-section" className="neo-card col-span-12">
             <h3 className="neo-card-header">Score History: {selectedRepo.repo}</h3>
             {selectedRepo.alert && (
               <div style={{ backgroundColor: 'var(--error-container)', border: '1px solid var(--error)', padding: '8px 12px', marginBottom: '12px' }}>
                 <span className="data-mono" style={{ color: 'var(--on-error-container)', fontSize: '13px' }}>{selectedRepo.alert}</span>
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', padding: '16px 0', borderBottom: '2px solid var(--outline)' }}>
-              {selectedRepo.score_history.map((point, idx) => {
-                const barColor = point.score >= 75 ? '#00C48C' : point.score >= 50 ? 'var(--primary-container)' : 'var(--error)';
-                return (
-                  <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                    <span className="data-mono" style={{ fontSize: '10px', color: 'var(--on-surface-variant)' }}>{point.score}</span>
-                    <div style={{
-                      width: '100%',
-                      height: `${point.score * 1.6}px`,
-                      backgroundColor: barColor,
-                      border: '1px solid var(--on-surface)',
-                      transition: 'height 0.3s',
-                    }} />
-                    <span className="data-mono" style={{ fontSize: '10px', color: 'var(--on-surface-variant)' }}>#{point.pr}</span>
-                  </div>
-                );
-              })}
+            <div style={{ position: 'relative', height: '500px', padding: '16px 0', borderBottom: '2px solid var(--outline)', marginTop: 'var(--space-md)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={selectedRepo.score_history} margin={{ top: 30, right: 20, bottom: 5, left: 0 }} onMouseLeave={() => setHoveredPoint(null)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" vertical={false} />
+                  <XAxis 
+                    dataKey="pr" 
+                    tickFormatter={(tick) => `#${tick}`} 
+                    stroke="var(--on-surface-variant)" 
+                    style={{ fontFamily: 'var(--font-data-mono-family)', fontSize: '12px' }} 
+                  />
+                  <YAxis 
+                    domain={['auto', 'auto']} 
+                    stroke="var(--on-surface-variant)" 
+                    style={{ fontFamily: 'var(--font-data-mono-family)', fontSize: '12px' }} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="var(--primary)" 
+                    strokeWidth={4}
+                    dot={(props) => {
+                      const { cx, cy, payload, key } = props;
+                      return (
+                        <circle 
+                          key={key} 
+                          cx={cx} 
+                          cy={cy} 
+                          r={8} 
+                          fill="var(--surface)" 
+                          stroke="var(--primary)" 
+                          strokeWidth={2} 
+                          style={{ cursor: 'pointer', transition: 'all 0.2s ease-in-out' }}
+                          onMouseEnter={() => setHoveredPoint({ cx, cy, payload })}
+                          onMouseLeave={() => setHoveredPoint(null)}
+                        />
+                      );
+                    }}
+                    activeDot={false} 
+                    label={{ position: 'top', fill: 'var(--on-surface)', fontSize: 14, fontWeight: 'bold', fontFamily: 'var(--font-data-mono-family)', dy: -15 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              {hoveredPoint && (
+                <div style={{
+                  position: 'absolute',
+                  left: hoveredPoint.cx,
+                  top: hoveredPoint.cy - 50,
+                  transform: 'translateX(-50%)',
+                  backgroundColor: 'var(--surface-container-high)',
+                  border: '1px solid var(--outline)',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  pointerEvents: 'none',
+                  color: 'var(--on-surface)',
+                  fontFamily: 'var(--font-data-mono-family)',
+                  fontSize: '13px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 100,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                }}>
+                  PR #{hoveredPoint.payload.pr} — Score: {hoveredPoint.payload.score}/100
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--space-md)' }}>
               <div className="data-mono" style={{ fontSize: '13px', color: 'var(--on-surface-variant)' }}>
@@ -133,4 +182,4 @@ function RiskTracker() {
   );
 }
 
-export default RiskTracker;
+export default SecurityHealthTracker;

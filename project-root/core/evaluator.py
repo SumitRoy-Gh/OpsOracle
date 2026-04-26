@@ -93,7 +93,7 @@ Return a JSON array. Each element must have exactly these fields:
 Return the JSON array only. Start with ["""
 
     try:
-        raw_response = client.invoke_json(prompt, SYSTEM_PROMPT)
+        raw_response = client.invoke_json(prompt, SYSTEM_PROMPT, max_retries=2, use_cache=True)
         if not raw_response.strip().startswith("["):
             raw_response = "[" + raw_response
         data = json.loads(raw_response)

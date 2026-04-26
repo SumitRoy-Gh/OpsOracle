@@ -579,7 +579,7 @@ def logs(ctx, logfile, paste, json_out):
     console.print(Panel(
         f"[bold]{result.get('summary', '')}[/bold]\n"
         f"Severity: [{color}]{_severity_icon(sev)} {sev}[/{color}]  |  "
-        f"Risk Score: [bold]{score}[/bold]/100",
+        f"Security Health Score: [bold]{score}[/bold]/100",
         title="[bold]Log Analysis Result[/bold]",
         border_style="yellow",
     ))
@@ -689,6 +689,12 @@ def chat(ctx, context):
                 response.raise_for_status()
                 data     = response.json()
                 answer   = data.get("response", "No response")
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    detail = e.response.json().get("detail", "Rate limit hit")
+                    answer = f"⚠️ OpsOracle: {detail}"
+                else:
+                    answer = f"HTTP Error: {e.response.status_code} - {e.response.text}"
             except Exception as e:
                 answer = f"Error: {e}"
 
@@ -914,7 +920,7 @@ def risk(ctx, repo):
 
     console.print(Panel(
         f"[bold]Repo:[/bold] {repo}\n"
-        f"[bold]Risk Score:[/bold] [{color}]{score}[/{color}]/100\n"
+        f"[bold]Security Health Score:[/bold] [{color}]{score}[/{color}]/100\n"
         f"[bold]Total Historical Findings:[/bold] {total}\n"
         f"[bold]Last Seen:[/bold] {data.get('most_recent', 'Never')[:19] if data.get('most_recent') else 'Never'}",
         title="[bold]Repo Risk Trend[/bold]",

@@ -382,7 +382,7 @@ function LandingPage() {
           </div>
           <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-sm)' }}>The Neural Pipeline</h2>
           <p className="ui-label-lg" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
-            Powered by RiskTracker Memory System
+            Powered by Security Health Tracker Memory System
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
