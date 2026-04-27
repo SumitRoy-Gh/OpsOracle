@@ -23,7 +23,7 @@ function Documentation() {
 
   return (
     <div style={{ display: 'flex', gap: 'var(--space-xl)', width: '100%', maxWidth: '1400px', margin: '0 auto', alignItems: 'flex-start' }}>
-      
+
       {/* Table of Contents Navigation */}
       <nav style={{ width: '250px', flexShrink: 0, position: 'sticky', top: 'var(--space-margin)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 6rem)', overflowY: 'auto', paddingRight: 'var(--space-md)' }}>
         <h3 className="ui-label-lg" style={{ marginBottom: 'var(--space-lg)', textTransform: 'uppercase', borderBottom: '2px solid var(--on-surface)', paddingBottom: 'var(--space-sm)' }}>Navigation</h3>
@@ -39,7 +39,7 @@ function Documentation() {
 
       {/* Main Content Area */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '64px', paddingBottom: '128px' }}>
-        
+
         <section id="getting-started" style={{ scrollMarginTop: '96px', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
           <h1 style={{ textTransform: 'uppercase', marginBottom: 'var(--space-md)' }}>Documentation</h1>
           <p className="data-mono" style={{ maxWidth: '800px', fontSize: '16px', marginBottom: 'var(--space-sm)' }}>
@@ -72,15 +72,18 @@ function Documentation() {
             <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>account_tree</span>
             <h2 style={{ textTransform: 'uppercase' }}>System Overview</h2>
           </div>
-          <div className="neo-card" style={{ padding: 'var(--space-lg)', backgroundColor: 'var(--surface-container-lowest)' }}>
-            <div style={{ width: '100%', height: '320px', backgroundColor: 'var(--surface-variant)', border: '2px solid var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', backgroundImage: 'repeating-linear-gradient(45deg, var(--surface-variant) 25%, transparent 25%, transparent 75%, var(--surface-variant) 75%, var(--surface-variant)), repeating-linear-gradient(45deg, var(--surface-variant) 25%, transparent 25%, transparent 75%, var(--surface-variant) 75%, var(--surface-variant))', backgroundPosition: '0 0, 10px 10px', backgroundSize: '20px 20px' }}>
-              <img alt="abstract network diagram" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUyjobwJ9DDqcM9Sn9fyNf0V0Sz2CTB2nfMtRGpp-Azf_tdw1dsZfPE1tfPoX2DN_kP4kaHtKB7RAWfmickY1jalcQ--698XzfXHV43QPet4JinalrTT94RKdKfsliys0Hkk6RmFljbqIMO4uuL_kZz63_c8jeTt2KoPvHAnBOCNqMwJu-Hsq-FfGZ3VdzcC-bIbrm4bQxLpy4ZjUNvSk_nfKRme-vECRKTCg3dvHj06gAyv1ZtoK-WLPcxnEG0Ji5Rlr1NF7mjho" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, mixBlendMode: 'multiply', filter: 'grayscale(100%) contrast(150%)' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(255,214,0,0.2), transparent)' }}></div>
-              <div className="neo-card" style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--surface-container-lowest)', padding: 'var(--space-md)', textAlign: 'center', maxWidth: '300px' }}>
-                <span style={{ fontFamily: 'var(--font-h3-family)', fontSize: '20px', textTransform: 'uppercase', fontWeight: 'bold' }}>Architecture Diagram</span>
-                <span className="data-mono" style={{ display: 'block', marginTop: 'var(--space-sm)', color: 'var(--secondary)', fontSize: '12px' }}>Refer to Fig 1.0</span>
-              </div>
-            </div>
+          <div className="neo-card" style={{ padding: 'var(--space-md)', backgroundColor: 'var(--surface-container-lowest)', overflow: 'hidden' }}>
+            <img 
+              alt="OpsOracle System Architecture" 
+              src="/architecture.png" 
+              style={{ 
+                width: '100%', 
+                height: 'auto', 
+                display: 'block',
+                border: '2px solid var(--on-surface)',
+                boxShadow: '4px 4px 0px 0px var(--on-surface)'
+              }} 
+            />
           </div>
         </section>
 
@@ -89,7 +92,7 @@ function Documentation() {
             <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>smart_toy</span>
             <h2 style={{ textTransform: 'uppercase' }}>Agents Detail</h2>
           </div>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-lg)' }}>
             {/* TriggerAgent */}
             <div className="neo-card" style={{ display: 'flex', flexDirection: 'column', padding: 0, backgroundColor: 'var(--surface-container-lowest)' }}>
@@ -118,14 +121,14 @@ function Documentation() {
                   </tbody>
                 </table>
                 <div className="neo-card data-mono" style={{ backgroundColor: 'var(--sidebar-bg)', color: '#00C48C', padding: 'var(--space-md)', overflowX: 'auto', marginTop: 'auto' }}>
-<pre style={{ margin: 0 }}><code>import {'{'} TriggerAgent {'}'} from '@opsoracle/core';
+                  <pre style={{ margin: 0 }}><code>import {'{'} TriggerAgent {'}'} from '@opsoracle/core';
 
-const agent = new TriggerAgent({'{'}
-  strictMode: true,
-  timeoutMs: 5000
-{'}'});
+                    const agent = new TriggerAgent({'{'}
+                    strictMode: true,
+                    timeoutMs: 5000
+                    {'}'});
 
-agent.listen();</code></pre>
+                    agent.listen();</code></pre>
                 </div>
               </div>
             </div>
@@ -143,12 +146,12 @@ agent.listen();</code></pre>
                   <span className="data-mono" style={{ backgroundColor: 'var(--on-surface)', color: 'var(--surface-container-lowest)', border: '2px solid var(--on-surface)', padding: '4px 8px', fontSize: '12px' }}>VectorDB: Pinecone</span>
                 </div>
                 <div className="neo-card data-mono" style={{ backgroundColor: 'var(--sidebar-bg)', color: '#00C48C', padding: 'var(--space-md)', overflowX: 'auto', marginTop: 'auto' }}>
-<pre style={{ margin: 0 }}><code>const findings = await analysisAgent.scan({'{'}
-  target: pr.diff,
-  context: repo.securityContext
-{'}'});
+                  <pre style={{ margin: 0 }}><code>const findings = await analysisAgent.scan({'{'}
+                    target: pr.diff,
+                    context: repo.securityContext
+                    {'}'});
 
-if(findings.critical &gt; 0) escalate();</code></pre>
+                    if(findings.critical &gt; 0) escalate();</code></pre>
                 </div>
               </div>
             </div>
@@ -269,7 +272,7 @@ if(findings.critical &gt; 0) escalate();</code></pre>
               <p className="data-mono" style={{ fontSize: '14px', marginBottom: 'var(--space-md)' }}>Run the sentinel CLI to generate a cryptographically secure webhook signature token.</p>
               <code style={{ display: 'block', backgroundColor: 'var(--sidebar-bg)', color: '#00C48C', padding: '12px', border: '2px solid var(--on-surface)', fontSize: '12px' }} className="data-mono">sentinel keys generate</code>
             </div>
-            
+
             <div className="neo-card" style={{ backgroundColor: 'var(--primary-container)', padding: 'var(--space-xl) var(--space-lg) var(--space-lg)', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, backgroundColor: 'var(--on-surface)', color: 'white', fontFamily: 'var(--font-h2-family)', fontSize: '24px', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '2px solid var(--on-surface)', borderBottom: '2px solid var(--on-surface)' }}>2</div>
               <h3 style={{ fontSize: '20px', textTransform: 'uppercase', marginBottom: 'var(--space-md)' }}>Configure VCS</h3>
