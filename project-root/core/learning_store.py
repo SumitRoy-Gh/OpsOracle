@@ -7,7 +7,7 @@ Uses flat JSON files — no database required.
 
 from __future__ import annotations
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -42,7 +42,7 @@ def save_finding_outcome(
         "severity":      severity,
         "fix_accepted":  fix_accepted,
         "false_positive": false_positive,
-        "timestamp":     datetime.utcnow().isoformat(),
+        "timestamp":     datetime.now(timezone.utc).isoformat(),
     })
     _write(_FINDINGS, history)
 
@@ -61,7 +61,7 @@ def save_feedback(
         "accepted":        accepted,
         "rejected":        rejected,
         "false_positives": false_positives,
-        "timestamp":       datetime.utcnow().isoformat(),
+        "timestamp":       datetime.now(timezone.utc).isoformat(),
     })
     _write(_FEEDBACK, feedback)
 

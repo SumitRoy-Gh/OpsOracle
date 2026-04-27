@@ -180,6 +180,10 @@ class GeminiClient:
                 response = self._client_genai.models.generate_content(
                     model=self.MODEL_ID,
                     contents=full_prompt,
+                    config={
+                        "max_output_tokens": 4096,
+                        "temperature": 0.1,
+                    }
                 )
                 text = response.text
 

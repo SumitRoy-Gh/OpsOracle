@@ -7,7 +7,7 @@ All Pinecone operations: connect, store findings, retrieve similar findings.
 from __future__ import annotations
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 from rag.embedder import get_embedding
@@ -69,7 +69,7 @@ def ingest_findings(findings: list[dict], repo: str, pr_number: int) -> int:
                 "file":       finding.get("file", ""),
                 "category":   finding.get("category", ""),
                 "explanation": finding.get("explanation", "")[:300],
-                "timestamp":  datetime.utcnow().isoformat(),
+                "timestamp":  datetime.now(timezone.utc).isoformat(),
             }
         })
 

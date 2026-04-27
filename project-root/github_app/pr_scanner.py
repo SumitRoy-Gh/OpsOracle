@@ -88,8 +88,8 @@ def process_pr(
 
     # Step 5: Evaluator — Gemini enriches all findings (with smart trigger)
     context_sample = "\n\n".join(
-        f"# {k}\n{v[:400]}"
-        for k, v in list(file_contents.items())[:3]
+        f"# {k}\n{v[:2000]}"
+        for k, v in list(file_contents.items())[:5]
     )
 
     # ── NEW: Ask the TriggerAgent if we should call Gemini ───────────────
@@ -183,7 +183,7 @@ def process_pr(
         scan_id          = scan_id,
         repo             = full_repo,
         pr_number        = pr_number,
-        risk_score       = result.risk_score,
+        health_score     = result.risk_score,
         overall_severity = result.overall_severity,
         findings         = findings_for_tracker,
     )

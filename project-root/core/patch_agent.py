@@ -137,7 +137,7 @@ Fix instruction: {finding.fix_suggestion}
 
 
 CURRENT FILE CONTENT ({finding.file}):
-{file_content[:3000]}
+{file_content[:15000]}
 
 
 Return the complete corrected file content with ONLY this one fix applied.

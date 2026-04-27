@@ -12,7 +12,7 @@ The key questions this answers:
 from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Deque, Optional
 import json
 from pathlib import Path
@@ -236,7 +236,7 @@ class RiskTracker:
             high_count       = severity_counts.get("HIGH",     0),
             medium_count     = severity_counts.get("MEDIUM",   0),
             low_count        = severity_counts.get("LOW",      0),
-            timestamp        = datetime.utcnow().isoformat(),
+            timestamp        = datetime.now(timezone.utc).isoformat(),
         )
 
         # Create window for this repo if it doesn't exist yet

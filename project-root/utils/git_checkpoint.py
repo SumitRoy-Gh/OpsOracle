@@ -8,7 +8,7 @@ If a patch causes problems, run: git revert HEAD   to undo it.
 from __future__ import annotations
 import subprocess
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 
@@ -22,7 +22,7 @@ def create_checkpoint(message: str = "") -> dict:
       {"success": True,  "sha": "abc123", "message": "..."}
       {"success": False, "error": "reason"}
     """
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     commit_msg = message or f"AUTO CHECKPOINT before AI patch — {timestamp}"
 
 

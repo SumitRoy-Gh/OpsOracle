@@ -30,5 +30,21 @@
     "fix_accepted": false,
     "false_positive": false,
     "timestamp": "2026-04-26T10:18:04.184285"
+  },
+  {
+    "finding_id": "PERF-002",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T05:14:04.426580+00:00"
+  },
+  {
+    "finding_id": "PERF-003",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T05:14:04.452835+00:00"
   }
 ]

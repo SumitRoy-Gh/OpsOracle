@@ -8,7 +8,7 @@ Called at the end of every PR scan.
 from __future__ import annotations
 import os
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 
@@ -101,7 +101,7 @@ class AutoRollback:
 
         # ── Record this event in history ─────────────────────────────────
         event = RollbackEvent(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             repo=repo,
             pr_number=pr_number,
             action=action,

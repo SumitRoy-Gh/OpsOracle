@@ -78,14 +78,14 @@ FILE CONTEXT (partial, for reference only):
 Return a JSON array. Each element must have exactly these fields:
 - id: string (keep original id or generate f_001, f_002 etc.)
 - title: string (5 words max, describes the issue)
-- file: string (from original finding, keep as-is)
-- line: integer (from original finding)
 - severity: string (CRITICAL | HIGH | MEDIUM | LOW | INFO)
-- category: string (security | cost | reliability | performance)
-- explanation: string (2-3 sentences, plain English, junior-developer friendly)
 - cost_impact: string (High | Medium | Low | None)
 - compliance: array of strings (e.g. ["CIS AWS 1.2", "SOC2 CC6.1"])
 - confidence: float between 0.0 and 1.0
+- category: string (security | cost | reliability | performance)
+- file: string (from original finding, keep as-is)
+- line: integer (from original finding)
+- explanation: string (2-3 sentences, plain English, junior-developer friendly)
 - fix_suggestion: string (one clear actionable sentence)
 - safe_auto_fix: boolean (true ONLY if fix is changing a single value)
 - resource: string (resource name if present in finding, else empty string)
@@ -98,6 +98,7 @@ Return the JSON array only. Start with ["""
             raw_response = "[" + raw_response
         data = json.loads(raw_response)
         enriched = [_dict_to_finding(item) for item in data]
+        enriched = [_apply_compliance_fallback(f) for f in enriched]
 
         # ── NEW: Store enriched findings in Pinecone ──────────────────────
         if repo and enriched:
@@ -116,7 +117,56 @@ Return the JSON array only. Start with ["""
         return _fallback_findings(raw_findings)
 
 
+_COMPLIANCE_FALLBACK = {
+    "root": {
+        "compliance":   ["CIS Docker 4.1", "SOC2 CC6.1", "Least Privilege"],
+        "cost_impact":  "Low",
+    },
+    "secret": {
+        "compliance":   ["CIS AWS 1.1", "SOC2 CC6.3", "HIPAA §164.312"],
+        "cost_impact":  "High",
+    },
+    "public": {
+        "compliance":   ["CIS AWS 2.1", "SOC2 CC6.6", "HIPAA §164.312"],
+        "cost_impact":  "High",
+    },
+    "encryption": {
+        "compliance":   ["CIS AWS 2.2", "SOC2 CC6.7", "HIPAA §164.312(a)"],
+        "cost_impact":  "Medium",
+    },
+    "version": {
+        "compliance":   ["SOC2 CC7.1", "CIS Docker 4.8"],
+        "cost_impact":  "Low",
+    },
+    "privilege": {
+        "compliance":   ["CIS Docker 4.1", "SOC2 CC6.1"],
+        "cost_impact":  "Low",
+    },
+}
+
+
+def _apply_compliance_fallback(finding: Finding) -> Finding:
+    if finding.compliance and finding.cost_impact not in ("None", "", None):
+        return finding  # already fully enriched
+    title_lower = finding.title.lower()
+    for keyword, data in _COMPLIANCE_FALLBACK.items():
+        if keyword in title_lower:
+            if not finding.compliance:
+                finding.compliance = data["compliance"]
+            if finding.cost_impact in ("None", "", None):
+                finding.cost_impact = data["cost_impact"]
+            print(f"[Evaluator] Applied fallback for: {finding.title}")
+            break
+    return finding
+
+
 def _dict_to_finding(item: dict) -> Finding:
+    # Warn loudly if enrichment fields are missing
+    if not item.get("compliance"):
+        print(f"[Evaluator] WARNING: compliance missing for finding {item.get('id', '?')}")
+    if not item.get("cost_impact") or item.get("cost_impact") == "None":
+        print(f"[Evaluator] WARNING: cost_impact missing for finding {item.get('id', '?')}")
+
     return Finding(
         id=str(item.get("id", "f_000")),
         title=str(item.get("title", "Unknown Issue"))[:80],
@@ -141,7 +191,7 @@ def _fallback_findings(raw_findings: list[dict]) -> list[Finding]:
     """
     results = []
     for i, f in enumerate(raw_findings):
-        results.append(Finding(
+        finding = Finding(
             id=str(f.get("id", f"f_{i:03d}")),
             title=str(f.get("message", "Issue"))[:80],
             file=str(f.get("file", "")),
@@ -155,5 +205,6 @@ def _fallback_findings(raw_findings: list[dict]) -> list[Finding]:
             fix_suggestion=str(f.get("suggestion", "")),
             safe_auto_fix=False,
             resource=str(f.get("resource", "")),
-        ))
+        )
+        results.append(_apply_compliance_fallback(finding))
     return results
