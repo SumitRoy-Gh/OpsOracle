@@ -53,4 +53,13 @@ export const api = {
   // Repos
   getUserRepos: () =>
     fetch(`${BASE_URL}/auth/github/repos`, { credentials: 'include' }).then(r => r.json()),
+
+  // Manual scan trigger
+  triggerScan: (repo) =>
+    fetch(`${BASE_URL}/api/trigger-scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ repo }),
+    }).then(r => r.json()),
 };
