@@ -46,5 +46,37 @@
     "fix_accepted": false,
     "false_positive": false,
     "timestamp": "2026-04-27T05:14:04.452835+00:00"
+  },
+  {
+    "finding_id": "SEC-006",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "HIGH",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T06:47:03.209887+00:00"
+  },
+  {
+    "finding_id": "REL-002",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "MEDIUM",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T06:47:03.242772+00:00"
+  },
+  {
+    "finding_id": "PERF-002",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T06:47:03.271600+00:00"
+  },
+  {
+    "finding_id": "PERF-003",
+    "repo": "SumitRoy-Gh/test-repo",
+    "severity": "LOW",
+    "fix_accepted": false,
+    "false_positive": false,
+    "timestamp": "2026-04-27T06:47:03.295457+00:00"
   }
 ]

@@ -287,6 +287,7 @@ h3 {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  z-index: 100;
 }
 
 .sidebar-header {
@@ -430,4 +431,11 @@ h3 {
   color: var(--surface-container-lowest);
   border: 2px solid var(--on-surface);
   box-shadow: 4px 4px 0px 0px var(--primary-container);
+}
+
+/* Force Run Scan modal above all stacking contexts */
+[data-modal-overlay] {
+  position: fixed !important;
+  z-index: 99999 !important;
+  isolation: isolate !important;
 }
