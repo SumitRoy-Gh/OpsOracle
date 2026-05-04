@@ -32,3 +32,5 @@ pinecone>=3.0.0
 sentence-transformers
 numpy
 
+checkov>=3.0.0
+

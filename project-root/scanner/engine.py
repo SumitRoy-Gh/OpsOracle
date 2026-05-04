@@ -93,6 +93,30 @@ def scan_file(file_path: str, content: str) -> dict[str, Any] | None:
 
     rule_fn = _RULE_MAP[file_type]
     findings: list[Finding] = rule_fn(content)
+
+    # ── NEW: Run Checkov for additional coverage ──────────────────────────
+    try:
+        from .checkov_runner import run_checkov
+        checkov_findings = run_checkov(file_path, content)
+        
+        # Convert Checkov dict findings to Finding dataclass objects
+        # but only add ones we haven't already caught
+        existing_ids = {f.id for f in findings}
+        for cf in checkov_findings:
+            if cf.get("id") not in existing_ids:
+                from .models import Finding as FindingModel
+                findings.append(FindingModel(
+                    id=cf.get("id", "CKV-000"),
+                    severity=cf.get("severity", "MEDIUM"),
+                    category=cf.get("category", "security"),
+                    line=cf.get("line", 0),
+                    message=cf.get("message", "Checkov finding"),
+                    suggestion=cf.get("suggestion", ""),
+                    resource=cf.get("resource", ""),
+                ))
+    except Exception as e:
+        print(f"[Scanner] Checkov integration error (non-fatal): {e}")
+    # ── END CHECKOV INTEGRATION ───────────────────────────────────────────
     
     # Enrich findings with metadata (Phase 2)
     enriched_findings = []

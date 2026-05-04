@@ -87,7 +87,7 @@ function RunScanButton() {
 
       {/* Overlay panel that appears when button is clicked */}
       {showPanel && (
-        <div 
+        <div
           data-modal-overlay=""
           style={{
             position: 'fixed',
