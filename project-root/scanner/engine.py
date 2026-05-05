@@ -66,6 +66,7 @@ _RULE_MAP = {
     "github_actions": github_actions.run_rules,
     "kubernetes":     kubernetes.run_rules,
     "sam":            sam.run_rules,
+    "dependencies":   lambda content: [],  # OSV handles these, not our regex rules
 }
 
 
@@ -117,6 +118,28 @@ def scan_file(file_path: str, content: str) -> dict[str, Any] | None:
     except Exception as e:
         print(f"[Scanner] Checkov integration error (non-fatal): {e}")
     # ── END CHECKOV INTEGRATION ───────────────────────────────────────────
+    
+    # ── NEW: Run OSV Scanner for dependency vulnerabilities ───────────────
+    try:
+        from .osv_runner import run_osv_scan
+        osv_findings = run_osv_scan(file_path, content)
+        
+        existing_ids = {f.id for f in findings}
+        for of in osv_findings:
+            if of.get("id") not in existing_ids:
+                from .models import Finding as FindingModel
+                findings.append(FindingModel(
+                    id=of.get("id", "OSV-000"),
+                    severity=of.get("severity", "MEDIUM"),
+                    category=of.get("category", "security"),
+                    line=of.get("line", 0),
+                    message=of.get("message", "Dependency vulnerability"),
+                    suggestion=of.get("suggestion", ""),
+                    resource=of.get("resource", ""),
+                ))
+    except Exception as e:
+        print(f"[Scanner] OSV integration error (non-fatal): {e}")
+    # ── END OSV INTEGRATION ───────────────────────────────────────────────
     
     # Enrich findings with metadata (Phase 2)
     enriched_findings = []

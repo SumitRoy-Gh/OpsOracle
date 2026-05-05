@@ -32,6 +32,10 @@ _PATTERNS = [
     (r"buildspec\.(yml|yaml)$", "github_actions"),  # Same rule set applies
     # Jenkinsfile
     (r"(^|[/\\])Jenkinsfile$", "jenkinsfile"),
+    # Dependency files (for OSV Scanner)
+    (r"requirements\.txt$", "dependencies"),
+    (r"package\.json$", "dependencies"),
+    (r"go\.mod$", "dependencies"),
 ]
 
 _COMPILED = [(re.compile(pat, re.IGNORECASE), ft) for pat, ft in _PATTERNS]
