@@ -145,6 +145,14 @@ def scan_file(file_path: str, content: str) -> dict[str, Any] | None:
     score = _calculate_score(findings)
     grade = _score_to_grade(score)
 
+    # ── Generate SBOM for applicable files ───────────────────────────────
+    sbom = None
+    try:
+        from .trivy_runner import generate_sbom
+        sbom = generate_sbom(file_path, content)
+    except Exception:
+        pass
+
     return {
         "file": file_path,
         "type": file_type,
@@ -153,6 +161,7 @@ def scan_file(file_path: str, content: str) -> dict[str, Any] | None:
         "findings": enriched_findings,
         "severity_counts": _severity_counts(findings),
         "supported": True,
+        "sbom": sbom,
     }
 
 

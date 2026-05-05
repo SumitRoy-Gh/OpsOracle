@@ -5,6 +5,15 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
+    wget \
+    apt-transport-https \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Trivy
+RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add - \
+    && echo "deb https://aquasecurity.github.io/trivy-repo/deb generic main" | tee /etc/apt/sources.list.d/trivy.list \
+    && apt-get update \
+    && apt-get install -y trivy \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
