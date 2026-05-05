@@ -81,6 +81,31 @@ function ScanDetail() {
         </div>
 
         {/* Findings list */}
+        {/* SBOM Section */}
+        {scan.results?.sbom && (
+          <div className="neo-card col-span-12" style={{ borderLeft: '6px solid #00C48C' }}>
+            <h3 className="neo-card-header">📦 Software Bill of Materials (SBOM)</h3>
+            <p className="data-mono" style={{ fontSize: '13px', color: 'var(--on-surface-variant)', marginBottom: '12px' }}>
+              CycloneDX format · {scan.results.sbom.components?.length || 0} components identified
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {(scan.results.sbom.components || []).slice(0, 20).map((comp, idx) => (
+                <span key={idx} className="neo-badge" style={{ 
+                  fontSize: '11px', 
+                  backgroundColor: 'var(--surface-container-low)',
+                  fontFamily: 'IBM Plex Mono'
+                }}>
+                  {comp.name}@{comp.version || '?'}
+                </span>
+              ))}
+              {(scan.results.sbom.components || []).length > 20 && (
+                <span className="data-mono" style={{ fontSize: '11px', color: 'var(--on-surface-variant)' }}>
+                  +{(scan.results.sbom.components || []).length - 20} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
         {findings.length === 0 ? (
           <div className="neo-card col-span-12" style={{ textAlign: 'center', padding: 'var(--space-xl)', backgroundColor: '#e8f5e9' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#00C48C' }}>check_circle</span>
