@@ -80,6 +80,7 @@ def _is_cloudsploit_installed() -> bool:
     return Path(f"{CLOUDSPLOIT_PATH}/index.js").exists()
 
 
+
 def _build_config(provider: str, credentials: dict) -> str | None:
     """Build a CloudSploit config.js file content."""
     if provider == "aws":
@@ -87,9 +88,9 @@ def _build_config(provider: str, credentials: dict) -> str | None:
 module.exports = {{
     credentials: {{
         aws: {{
-            access_key: '{credentials.get("access_key", "")}',
-            secret_access_key: '{credentials.get("secret_key", "")}',
-            region: '{credentials.get("region", "us-east-1")}',
+            access_key: {json.dumps(credentials.get("access_key", ""))},
+            secret_access_key: {json.dumps(credentials.get("secret_key", ""))},
+            region: {json.dumps(credentials.get("region", "us-east-1"))},
         }}
     }}
 }};
@@ -99,9 +100,9 @@ module.exports = {{
 module.exports = {{
     credentials: {{
         google: {{
-            project: '{credentials.get("project_id", "")}',
-            client_email: '{credentials.get("client_email", "")}',
-            private_key: `{credentials.get("private_key", "")}`,
+            project: {json.dumps(credentials.get("project_id", ""))},
+            client_email: {json.dumps(credentials.get("client_email", ""))},
+            private_key: {json.dumps(credentials.get("private_key", ""))},
         }}
     }}
 }};

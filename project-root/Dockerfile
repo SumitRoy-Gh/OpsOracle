@@ -21,7 +21,7 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
     && rm -rf /var/lib/apt/lists/*
 
 # Install OSV Scanner (Google's dependency vulnerability tool)
-RUN curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+RUN curl -L https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64 \
     -o /usr/local/bin/osv-scanner \
     && chmod +x /usr/local/bin/osv-scanner
 
@@ -33,6 +33,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 # Install CloudSploit
 RUN git clone https://github.com/aquasecurity/cloudsploit.git /opt/cloudsploit \
     && cd /opt/cloudsploit \
+    && git reset --hard af8618a4f9b98340d76e30201d6f4127c23e2b88 \
     && npm install --quiet
 
 COPY requirements.txt .

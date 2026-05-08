@@ -122,7 +122,7 @@ _cache = _ResponseCache(maxsize=128, ttl_seconds=300)
 # ── Gemini Client ─────────────────────────────────────────────────────────────
 
 class GeminiClient:
-    MODEL_ID = "gemini-3-flash-preview"
+    MODEL_ID = "gemini-2.0-flash"
 
     def __init__(self, api_key: str | None = None):
         key = api_key or os.environ.get("GEMINI_API_KEY", "")
