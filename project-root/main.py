@@ -282,21 +282,15 @@ def risk_tracker_alerts():
     }
 
 
-# ── Manual Scan Trigger ────────────────────────────────────────────────────────
+# ── Cloud Posture Scan ─────────────────────────────────────────────────────
 
-@app.post("/api/trigger-scan")
-async def trigger_manual_scan(request: Request):
+@app.post("/api/cloud-posture-scan")
+async def cloud_posture_scan(request: Request):
     """
-    Manually trigger a scan on the latest commit of a repo.
-    Used by the dashboard Run Scan button.
+    Run a live cloud security scan using CloudSploit.
+    Requires cloud credentials in the request body.
     """
-    body = await request.json()
-    repo_full = body.get("repo", "")  # format: "owner/reponame"
-    
-    if not repo_full or "/" not in repo_full:
-        raise HTTPException(status_code=400, detail="Invalid repo format. Use owner/reponame")
-    
-    # Get the session token to find the user's installation_id
+    # Auth check
     token = request.cookies.get("opsoracle_session")
     if not token:
         raise HTTPException(status_code=401, detail="Not logged in")
@@ -305,117 +299,67 @@ async def trigger_manual_scan(request: Request):
     user_id = _verify_session_token(token)
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid session")
-    
-    from github_app.db import get_user_by_id
-    user = get_user_by_id(user_id)
-    if not user or not user.get("installation_id"):
-        raise HTTPException(status_code=400, detail="GitHub App not installed")
-    
-    # Run the scan in the background
-    owner, repo_name = repo_full.split("/", 1)
-    
+
+    body = await request.json()
+    provider = body.get("provider", "aws")
+    credentials = body.get("credentials", {})
+
+    if not credentials:
+        raise HTTPException(status_code=400, detail="No credentials provided")
+
     try:
-        from github_app.auth import get_installation_token
-        from github_app.github_client import GitHubClient
+        from core.cloud_posture import run_cloud_posture_scan
+        raw_findings = run_cloud_posture_scan(provider, credentials)
         
-        inst_token = get_installation_token(int(user["installation_id"]))
-        client = GitHubClient(inst_token)
-        
-        # Get the default branch latest commit SHA
-        import httpx as _httpx
-        branch_resp = _httpx.get(
-            f"https://api.github.com/repos/{owner}/{repo_name}/branches",
-            headers={
-                "Authorization": f"Bearer {inst_token}",
-                "Accept": "application/vnd.github.v3+json",
-            },
-            timeout=15,
-        )
-        branches = branch_resp.json()
-        if not branches:
-            raise HTTPException(status_code=404, detail="No branches found")
-        
-        # Use the first branch (usually main or master)
-        default_branch = branches[0]
-        commit_sha = default_branch["commit"]["sha"]
-        branch_name = default_branch["name"]
-        
-        # Get all files from the repo tree
-        tree_resp = _httpx.get(
-            f"https://api.github.com/repos/{owner}/{repo_name}/git/trees/{commit_sha}?recursive=1",
-            headers={
-                "Authorization": f"Bearer {inst_token}",
-                "Accept": "application/vnd.github.v3+json",
-            },
-            timeout=15,
-        )
-        tree = tree_resp.json()
-        
-        from scanner.detector import is_infra_file
-        from scanner.engine import scan_file
+        if not raw_findings:
+            return {"status": "clean", "findings": [], "total": 0}
+
+        # Convert to Finding schema and run through Gemini enrichment
+        from schemas import Finding
+        finding_objects = []
+        for f in raw_findings:
+            try:
+                finding_objects.append(Finding(
+                    id=f["id"],
+                    title=f["message"][:80],
+                    file=f.get("file", "live_cloud"),
+                    line=0,
+                    severity=f["severity"],
+                    category=f["category"],
+                    explanation=f["message"],
+                    cost_impact="None",
+                    compliance=f.get("compliance", []),
+                    confidence=0.9,
+                    fix_suggestion=f["suggestion"],
+                    safe_auto_fix=False,
+                    resource=f.get("resource", ""),
+                ))
+            except Exception:
+                pass
+
+        # Enrich with Gemini
         from core.evaluator import evaluate_findings
-        from core.fix_builder import build_fixes
-        from risk_engine import build_analysis_result
-        from github_app.db import save_scan
-        
-        all_raw_findings = []
-        file_contents = {}
-        
-        for item in tree.get("tree", []):
-            if item["type"] == "blob" and is_infra_file(item["path"]):
-                content = client.get_file_content(owner, repo_name, item["path"], commit_sha) or ""
-                file_contents[item["path"]] = content
-                scan_result = scan_file(item["path"], content)
-                if scan_result and scan_result.get("findings"):
-                    for f in scan_result["findings"]:
-                        f["file"] = item["path"]
-                    all_raw_findings.extend(scan_result["findings"])
-        
-        if not all_raw_findings and not file_contents:
-            return {"status": "no_infra_files", "message": "No infrastructure files found in this repo"}
-        
-        # Run AI enrichment
-        context_sample = "\n\n".join(
-            f"# {k}\n{v[:2000]}" for k, v in list(file_contents.items())[:5]
+        enriched = evaluate_findings(
+            [fo.__dict__ for fo in finding_objects],
+            "Live cloud infrastructure scan",
         )
-        enriched = evaluate_findings(all_raw_findings, context_sample, repo=repo_full, pr_number=0)
-        enriched = build_fixes(enriched, file_contents)
-        
+
+        from risk_engine import build_analysis_result
         result = build_analysis_result(
             findings=enriched,
-            source_type="pr",
-            repo=repo_full,
-            pr_number=None,
-            commit_sha=commit_sha,
+            source_type="cloud_posture",
         )
-        
-        scan_id = save_scan(
-            repo=repo_full,
-            scan_result=result.model_dump(),
-            pr_number=None,
-            commit_sha=commit_sha,
-        )
-        
-        # Update risk tracker
-        findings_for_tracker = [f.model_dump() for f in enriched]
-        from github_app.pr_scanner import _risk_tracker
-        _risk_tracker.record_scan(
-            scan_id=scan_id,
-            repo=repo_full,
-            pr_number=0,
-            health_score=result.risk_score,
-            overall_severity=result.overall_severity,
-            findings=findings_for_tracker,
-        )
-        
+
         return {
             "status": "complete",
-            "scan_id": scan_id,
+            "findings": [f.model_dump() for f in enriched],
+            "total": len(enriched),
             "score": result.risk_score,
-            "findings": len(enriched),
             "severity": result.overall_severity,
-            "branch": branch_name,
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+

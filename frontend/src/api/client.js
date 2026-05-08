@@ -54,12 +54,13 @@ export const api = {
   getUserRepos: () =>
     fetch(`${BASE_URL}/auth/github/repos`, { credentials: 'include' }).then(r => r.json()),
 
-  // Manual scan trigger
-  triggerScan: (repo) =>
-    fetch(`${BASE_URL}/api/trigger-scan`, {
+
+  // Cloud Posture
+  cloudPostureScan: (provider, credentials) =>
+    fetch(`${BASE_URL}/api/cloud-posture-scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ repo }),
+      body: JSON.stringify({ provider, credentials }),
     }).then(r => r.json()),
 };

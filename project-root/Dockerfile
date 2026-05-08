@@ -6,12 +6,16 @@ RUN apt-get update && apt-get install -y \
     gcc \
     curl \
     wget \
+    git \
+    gnupg \
     apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Trivy
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add - \
-    && echo "deb https://aquasecurity.github.io/trivy-repo/deb generic main" | tee /etc/apt/sources.list.d/trivy.list \
+# Install Trivy (modern gpg keyring method — apt-key is removed in Debian Trixie)
+RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+    | gpg --dearmor -o /usr/share/keyrings/trivy.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+    | tee /etc/apt/sources.list.d/trivy.list \
     && apt-get update \
     && apt-get install -y trivy \
     && rm -rf /var/lib/apt/lists/*
