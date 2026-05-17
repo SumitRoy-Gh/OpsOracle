@@ -137,12 +137,12 @@ python cli.py scan ./my-project-files/ --patch
 
 To pull the pre-built OpsOracle image from Docker Hub:
 ```bash
-docker pull <your-dockerhub-username>/opsoracle-backend:latest
+docker pull sumitroydocker/project-root-backend:latest
 ```
 
 To run it without the source code:
 ```bash
-docker run -p 8000:8000 --env-file .env <your-dockerhub-username>/opsoracle-backend:latest
+docker run -p 8000:8000 --env-file .env sumitroydocker/project-root-backend:latest
 ```
 
 ---
