@@ -81,69 +81,12 @@ To save API costs and improve speed, the Trigger Agent:
 6.  **Review:** User reviews the changes; if they dislike them, they run `python cli.py rollback`.
 
 ---
+## 🚦 Getting Started & Team Collaboration
 
-## 🏁 Getting Started (On Any Device)
+To keep our repository clean and organized, we have separated the setup details and team workflow guides into separate, easy-to-read documents:
 
-Follow these steps to set up OpsOracle from scratch on a new machine.
-
-### 1. Prerequisites
-*   **Docker Desktop** (Must be running)
-*   **Python 3.11+**
-*   **ngrok** account (for a free static domain)
-*   **Google AI Studio API Key** (Gemini)
-
-### 2. Clone and Configure
-```bash
-git clone <your-repo-url>
-cd project-root
-cp .env.example .env
-```
-Update the `.env` file with your credentials:
-*   `GEMINI_API_KEY`: Your key from AI Studio.
-*   `GITHUB_APP_ID` & `GITHUB_PRIVATE_KEY_PATH`: From your GitHub App settings.
-*   `NGROK_AUTHTOKEN`: From your ngrok dashboard.
-
-### 3. Launch the Backend
-```bash
-docker-compose up --build -d
-```
-This starts the **FastAPI backend** and the **ngrok tunnel**. 
-*   Check health: `http://localhost:8000/health`
-*   Get your ngrok URL: `http://localhost:4040/api/tunnels`
-
-### 4. Setup the CLI (On the local machine)
-```bash
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # Or venv\Scripts\activate on Windows
-
-# Install requirements
-pip install -r requirements.txt
-```
-
-### 5. Running your first scan
-**Local Mode:**
-```bash
-python cli.py scan ./my-project-files/
-```
-**Auto-Fix Mode:**
-```bash
-python cli.py scan ./my-project-files/ --patch
-```
-
----
-
-## 📦 Docker Hub Integration
-
-To pull the pre-built OpsOracle image from Docker Hub:
-```bash
-docker pull sumitroydocker/project-root-backend:latest
-```
-
-To run it without the source code:
-```bash
-docker run -p 8000:8000 --env-file .env sumitroydocker/project-root-backend:latest
-```
+* **🛠️ [setup.md](setup.md):** The comprehensive guide to set up the project on any machine in under 5 minutes. Includes setting up your Google Gemini AI key, Pinecone vector storage index, Ngrok tunnel, and pre-populated shared team credentials.
+* **👥 [collaborative_workflow.md](collaborative_workflow.md):** The team workflow guide explaining how developers collaborate, write code, run local tests, build branch Docker images, push them to Docker Hub, and open Pull Requests.
 
 ---
 
